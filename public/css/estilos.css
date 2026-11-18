@@ -1,0 +1,360 @@
+
+
+/*-------------------------------INICIO-----------------------------------*/
+
+
+
+
+:root {
+  --bg-color: #ffffff;
+  --text-main: #111111;
+  --text-muted: #666666;
+  --accent-dark: #141414;
+  --border-light: #e5e7eb;
+  --radius-lg: 20px;
+  --radius-pill: 999px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-main);
+  line-height: 1.5;
+  overflow-x: hidden;
+}
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 28px 6%;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.brand {
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--text-main);
+  text-decoration: none;
+}
+
+.nav-links {
+  display: flex;
+  gap: 28px;
+  list-style: none;
+  padding: 10px 22px;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-pill);
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.nav-links a {
+  color: var(--text-main);
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+
+.nav-links a:hover {
+  opacity: 0.6;
+}
+
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 72px 6% 90px;
+}
+
+.about-header {
+  margin-bottom: 64px;
+}
+
+.tag {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 12px;
+  display: block;
+}
+
+.page-title {
+  font-size: clamp(2.5rem, 5vw, 4.2rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  max-width: 780px;
+  margin-bottom: 24px;
+}
+
+.page-lead {
+  font-size: 1.15rem;
+  color: var(--text-muted);
+  max-width: 620px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-bottom: 72px;
+  padding: 36px 0;
+  border-top: 1px solid var(--border-light);
+  border-bottom: 1px solid var(--border-light);
+}
+
+.stat-item h3 {
+  font-size: 2.5rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  margin-bottom: 4px;
+}
+
+.stat-item p {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.team-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 32px;
+}
+
+.team-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.team-card {
+  background: #fafafa;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.team-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.05);
+}
+
+.team-img {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 14px;
+  object-fit: cover;
+  margin-bottom: 16px;
+  background-color: #e5e7eb;
+}
+
+.team-name {
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.team-role {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+@media (max-width: 768px) {
+  .nav-links { display: none; }
+  .stats-grid, .team-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+
+
+
+/*-------------------------------NOSOTROS-----------------------------------*/
+
+
+
+
+
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 72px 6% 90px;
+}
+
+.about-header {
+  margin-bottom: 64px;
+}
+
+.tag {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 12px;
+  display: block;
+}
+
+.page-title {
+  font-size: clamp(2.5rem, 5vw, 4.2rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  max-width: 780px;
+  margin-bottom: 24px;
+}
+
+.page-lead {
+  font-size: 1.15rem;
+  color: var(--text-muted);
+  max-width: 620px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-bottom: 72px;
+  padding: 36px 0;
+  border-top: 1px solid var(--border-light);
+  border-bottom: 1px solid var(--border-light);
+}
+
+.stat-item h3 {
+  font-size: 2.5rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  margin-bottom: 4px;
+}
+
+.stat-item p {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.team-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 32px;
+}
+
+.team-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.team-card {
+  background: #fafafa;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.team-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.05);
+}
+
+.team-img {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 14px;
+  object-fit: cover;
+  margin-bottom: 16px;
+  background-color: #e5e7eb;
+}
+
+.team-name {
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.team-role {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+@media (max-width: 768px) {
+  .nav-links { display: none; }
+  .stats-grid, .team-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+
+
+
+/*---------------------------------tasaciones----------------------------------*/
+
+
+
+
+
+.form-container {
+  max-width: 700px;
+  margin: 0 auto;
+  background: #fafafa;
+  padding: 40px;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+}
+
+.form-title {
+  margin-bottom: 24px;
+  font-size: 1.35rem;
+  font-weight: 700;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.form-input, .form-select {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-pill);
+  outline: none;
+  font-size: 0.9rem;
+  background: #fff;
+}
+
+.form-button {
+  background: var(--accent-dark);
+  color: #fff;
+  border: none;
+  padding: 14px;
+  border-radius: var(--radius-pill);
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 10px;
+}
