@@ -1,5 +1,5 @@
 @extends('layout.app')
-
+<!-- se subio el cambio? -->
 @section('contenido')
 
   <!-- 1. SECCIÓN HERO -->
