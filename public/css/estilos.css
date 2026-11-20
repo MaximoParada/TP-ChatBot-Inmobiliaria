@@ -1,7 +1,4 @@
-
-
 /*-------------------------------INICIO-----------------------------------*/
-
 
     /* --- RESET Y VARIABLES --- */
     :root {
@@ -28,117 +25,164 @@
       overflow-x: hidden;
     }
 
-    /* --- HERO SECTION (Inspirado en KondoRu) --- */
+    /* --- HERO SECTION CENTRADO Y LEGIBLE --- */
     .hero {
       position: relative;
-      height: 82vh;
-      min-height: 580px;
-      /* Imagen de arquitectura moderna con cielo azul limpio */
-      background: linear-gradient(180deg, rgba(43, 88, 138, 0.35) 0%, rgba(20, 40, 65, 0.25) 100%),
+      height: 78vh;
+      min-height: 540px;
+      background: radial-gradient(circle at 50% 45%, rgba(15, 23, 42, 0.74) 0%, rgba(15, 23, 42, 0.54) 60%, rgba(15, 23, 42, 0.78) 100%),
                   url('https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1600&q=80') center/cover no-repeat;
       display: flex;
       flex-direction: column;
-      justify-content: space-between;
-      padding: 28px 6%;
-      color: #ffffff;
-    }
-
-    /* Navegación superior transparente */
-    .navbar {
-      display: flex;
-      justify-content: space-between;
+      justify-content: center;
       align-items: center;
-      font-size: 0.9rem;
-    }
-
-    .nav-links {
-      display: flex;
-      gap: 28px;
-      list-style: none;
-      padding: 10px 22px;
-      border: 1px solid rgba(255, 255, 255, 0.75);
-      border-radius: var(--radius-pill);
+      text-align: center;
+      padding: 40px 6%;
       color: #ffffff;
-      text-decoration: none;
-      font-size: 0.85rem;
-      font-weight: 500;
-      transition: all 0.25s ease;
     }
 
-    .nav-links a {
-      color: rgba(255, 255, 255, 0.9);
-      text-decoration: none;
-      font-weight: 500;
-      transition: opacity 0.2s;
-    }
-
-    .nav-links a:hover {
-      opacity: 0.7;
-    }
-
-    .btn-outline-light:hover {
-      background: #ffffff;
-      color: var(--text-main);
-    }
-
-    /* Título gigante central */
+    /* Título y subtítulo centrados */
     .hero-content {
-      max-width: 1100px;
+      max-width: 960px;
       width: 100%;
       margin: 0 auto;
-      padding-bottom: 20px;
     }
 
     .hero-title {
-      font-size: clamp(3.5rem, 9vw, 7.5rem);
+      font-size: clamp(3.4rem, 7.5vw, 6rem);
       font-weight: 800;
       letter-spacing: -0.04em;
-      line-height: 0.95;
-      margin-bottom: 14px;
+      line-height: 1;
+      margin-bottom: 16px;
+      color: #ffffff;
+      text-shadow: 0 8px 32px rgba(0, 0, 0, 0.45), 0 2px 6px rgba(0, 0, 0, 0.35);
     }
 
     .hero-subtitle {
-      font-size: 1.15rem;
-      font-weight: 400;
-      opacity: 0.95;
-      max-width: 320px;
-      margin-bottom: 36px;
+      font-size: 1.18rem;
+      font-weight: 500;
+      line-height: 1.55;
+      color: #f8fafc;
+      max-width: 500px;
+      margin: 0 auto 38px auto;
+      text-shadow: 0 2px 16px rgba(0, 0, 0, 0.8), 0 1px 4px rgba(0, 0, 0, 0.65);
     }
 
-    /* Barra de búsqueda tipo píldora */
+    /* Barra de búsqueda tipo píldora moderna */
     .search-bar {
-      background: #ffffff;
+      background: rgba(255, 255, 255, 0.98);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.85);
       border-radius: var(--radius-pill);
-      padding: 8px 8px 8px 26px;
+      padding: 8px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
-      max-width: 880px;
+      gap: 4px;
+      box-shadow: 0 24px 50px rgba(15, 23, 42, 0.32);
+      max-width: 860px;
+      width: 100%;
+      margin: 0 auto;
     }
 
     .search-field {
+      position: relative;
       display: flex;
-      flex-direction: column;
+      align-items: center;
       flex: 1;
-      border-right: 1px solid var(--border-light);
-      padding-right: 14px;
+      border-radius: var(--radius-pill);
+      transition: background-color 0.2s ease;
     }
 
-    .search-field:last-of-type {
-      border-right: none;
+    .search-field:hover {
+      background-color: #f1f5f9;
     }
 
+    .search-field:not(:last-of-type)::after {
+      content: "";
+      position: absolute;
+      right: -2px;
+      top: 24%;
+      height: 52%;
+      width: 1px;
+      background-color: #e2e8f0;
+      transition: opacity 0.2s ease;
+    }
+
+    .search-field:hover::after {
+      opacity: 0;
+    }
+
+    /* Desplegable moderno y menú abierto redondeado */
     .search-field select {
+      width: 100%;
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: base-select;
       border: none;
-      background: transparent;
+      background-color: transparent;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23475569' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 16px center;
+      background-size: 15px;
       font-size: 0.9rem;
-      font-weight: 500;
-      color: var(--text-main);
+      font-weight: 600;
+      color: #0f172a;
       outline: none;
       cursor: pointer;
-      padding: 6px 0;
+      padding: 12px 38px 12px 20px;
+      border-radius: var(--radius-pill);
+      transition: background-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .search-field select::picker-icon {
+      display: none;
+    }
+
+    .search-field select:focus,
+    .search-field select:open {
+      background-color: #f8fafc;
+      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08), 0 0 0 1.5px #cbd5e1;
+    }
+
+    /* Caja flotante redondeada cuando se abre el desplegable */
+    .search-field select::picker(select) {
+      appearance: base-select;
+      background-color: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 20px;
+      padding: 8px;
+      margin-top: 8px;
+      box-shadow: 0 20px 44px rgba(15, 23, 42, 0.16);
+      min-width: 190px;
+    }
+
+    .search-field select option {
+      background-color: transparent;
+      color: #1e293b;
+      font-size: 0.88rem;
+      font-weight: 500;
+      padding: 10px 14px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background-color 0.15s ease, color 0.15s ease;
+    }
+
+    .search-field select option:hover,
+    .search-field select option:focus {
+      background-color: #f1f5f9;
+      color: #0f172a;
+    }
+
+    .search-field select option:checked {
+      background-color: #0f172a;
+      color: #ffffff;
+      font-weight: 600;
+    }
+
+    .search-field select option::checkmark {
+      display: none;
     }
 
     .btn-search {
@@ -150,43 +194,70 @@
       font-size: 0.9rem;
       font-weight: 600;
       cursor: pointer;
-      transition: transform 0.2s, background 0.2s;
+      transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
       white-space: nowrap;
+      margin-left: 4px;
     }
 
     .btn-search:hover {
-      background: #333333;
+      background: #27272a;
       transform: translateY(-1px);
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.2);
     }
 
-    /* --- SECCIÓN INFERIOR (Propuesta + Propiedades) --- */
+    /* --- SECCIÓN INFERIOR (Propuesta + Botón Bot + Propiedades) --- */
     .showcase {
       max-width: 1100px;
       margin: 0 auto;
-      padding: 80px 6% 90px;
+      padding: 72px 6% 90px;
     }
 
-    /* Cabecera asimétrica de dos columnas */
+    /* Cabecera: texto a la izquierda y botón del bot grande a la derecha */
     .showcase-header {
-      display: grid;
-      grid-template-columns: 1fr 2fr;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
       gap: 40px;
-      align-items: start;
       margin-bottom: 56px;
     }
 
-    .showcase-tag {
-      font-size: 0.85rem;
-      color: var(--text-muted);
-      max-width: 180px;
-    }
-
     .showcase-statement {
-      font-size: clamp(1.35rem, 2.5vw, 1.85rem);
-      font-weight: 500;
+      max-width: 680px;
+      font-size: clamp(1.35rem, 2.4vw, 1.8rem);
+      font-weight: 600;
       letter-spacing: -0.02em;
       line-height: 1.35;
       color: var(--text-main);
+      text-align: left;
+      margin: 0;
+    }
+
+    /* Botón circular grande de la casita SVG */
+    .btn-bot-showcase {
+      width: 94px;
+      height: 94px;
+      border-radius: 50%;
+      background-color: #ffffff;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 12px 32px rgba(15, 23, 42, 0.09);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      cursor: pointer;
+      transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.25s ease, border-color 0.25s ease;
+    }
+
+    .btn-bot-showcase:hover {
+      transform: translateY(-4px) scale(1.05);
+      border-color: #cbd5e1;
+      box-shadow: 0 18px 38px rgba(15, 23, 42, 0.15);
+    }
+
+    .btn-bot-showcase img {
+      width: 56px;
+      height: 56px;
+      object-fit: contain;
     }
 
     /* Grilla de 3 tarjetas minimalistas */
@@ -261,21 +332,32 @@
 
     /* --- RESPONSIVE PARA CELULARES --- */
     @media (max-width: 768px) {
-      .nav-links { display: none; }
+      .hero {
+        height: auto;
+        min-height: 480px;
+        padding: 60px 16px;
+      }
       .search-bar {
         flex-direction: column;
         border-radius: 24px;
-        padding: 16px;
+        padding: 14px;
         align-items: stretch;
+        gap: 6px;
       }
-      .search-field {
-        border-right: none;
-        border-bottom: 1px solid var(--border-light);
-        padding: 6px 0;
+      .search-field:not(:last-of-type)::after {
+        display: none;
+      }
+      .search-field select {
+        border-radius: 14px;
+      }
+      .btn-search {
+        margin-left: 0;
+        margin-top: 4px;
       }
       .showcase-header {
-        grid-template-columns: 1fr;
-        gap: 16px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 20px;
       }
       .cards-grid {
         grid-template-columns: 1fr;
@@ -283,165 +365,161 @@
     }
 
     /* --- CARRUSEL Y ATRIBUTOS DE TARJETA (INICIO) --- */
-.card-carousel {
-  position: relative;
-}
+    .card-carousel {
+      position: relative;
+    }
 
-.carousel-track {
-  width: 100%;
-  height: 100%;
-  position: relative;
-}
+    .carousel-track {
+      width: 100%;
+      height: 100%;
+      position: relative;
+    }
 
-.carousel-slide {
-  display: none;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
+    .carousel-slide {
+      display: none;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
 
-.carousel-slide.active {
-  display: block;
-}
+    .carousel-slide.active {
+      display: block;
+    }
 
-.badge-operacion {
-  position: absolute;
-  top: 12px;
-  left: 12px;
-  z-index: 2;
-  background: rgba(20, 20, 20, 0.82);
-  color: #ffffff;
-  font-size: 0.75rem;
-  font-weight: 600;
-  padding: 5px 12px;
-  border-radius: var(--radius-pill);
-  letter-spacing: 0.02em;
-}
+    .badge-operacion {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      z-index: 2;
+      background: rgba(20, 20, 20, 0.82);
+      color: #ffffff;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 5px 12px;
+      border-radius: var(--radius-pill);
+      letter-spacing: 0.02em;
+    }
 
-.carousel-btn {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 2;
-  width: 32px;
-  height: 32px;
-  border: none;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.88);
-  color: var(--text-main);
-  font-size: 0.9rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  transition: opacity 0.2s ease, background 0.2s ease;
-}
+    .carousel-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 2;
+      width: 32px;
+      height: 32px;
+      border: none;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.88);
+      color: var(--text-main);
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.2s ease, background 0.2s ease;
+    }
 
-.property-card:hover .carousel-btn {
-  opacity: 1;
-}
+    .property-card:hover .carousel-btn {
+      opacity: 1;
+    }
 
-.carousel-btn:hover {
-  background: #ffffff;
-}
+    .carousel-btn:hover {
+      background: #ffffff;
+    }
 
-.carousel-btn.prev {
-  left: 10px;
-}
+    .carousel-btn.prev {
+      left: 10px;
+    }
 
-.carousel-btn.next {
-  right: 10px;
-}
+    .carousel-btn.next {
+      right: 10px;
+    }
 
-.carousel-dots {
-  position: absolute;
-  bottom: 10px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 2;
-  display: flex;
-  gap: 6px;
-  padding: 4px 8px;
-  border-radius: var(--radius-pill);
-  background: rgba(0, 0, 0, 0.35);
-}
+    .carousel-dots {
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 2;
+      display: flex;
+      gap: 6px;
+      padding: 4px 8px;
+      border-radius: var(--radius-pill);
+      background: rgba(0, 0, 0, 0.35);
+    }
 
-.carousel-dot {
-  width: 7px;
-  height: 7px;
-  border: none;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.5);
-  padding: 0;
-  cursor: pointer;
-  transition: transform 0.2s ease, background 0.2s ease;
-}
+    .carousel-dot {
+      width: 7px;
+      height: 7px;
+      border: none;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.5);
+      padding: 0;
+      cursor: pointer;
+      transition: transform 0.2s ease, background 0.2s ease;
+    }
 
-.carousel-dot.active {
-  background: #ffffff;
-  transform: scale(1.2);
-}
+    .carousel-dot.active {
+      background: #ffffff;
+      transform: scale(1.2);
+    }
 
-.card-price-row {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 8px;
-  margin-bottom: 4px;
-}
+    .card-price-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
 
-.card-price {
-  font-size: 1.15rem;
-  font-weight: 800;
-  color: var(--text-main);
-}
+    .card-price {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--text-main);
+    }
 
-.card-expensas {
-  font-size: 0.78rem;
-  color: var(--text-muted);
-}
+    .card-expensas {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
 
-.card-specs {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 8px;
-  padding-top: 8px;
-  border-top: 1px solid var(--border-light);
-  font-size: 0.82rem;
-  font-weight: 500;
-  color: var(--text-muted);
-}
+    .card-specs {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid var(--border-light);
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--text-muted);
+    }
 
-.empty-properties {
-  grid-column: 1 / -1;
-  text-align: center;
-  color: var(--text-muted);
-  padding: 32px 0;
-}
+    .empty-properties {
+      grid-column: 1 / -1;
+      text-align: center;
+      color: var(--text-muted);
+      padding: 32px 0;
+    }
 
-.badge-id {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  z-index: 2;
-  background: rgba(255, 255, 255, 0.92);
-  color: var(--text-main);
-  font-size: 0.75rem;
-  font-weight: 700;
-  padding: 5px 11px;
-  border-radius: var(--radius-pill);
-  letter-spacing: 0.02em;
-  user-select: all;
-  cursor: text;
-}
-
-
-
-
-
+    .badge-id {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      z-index: 2;
+      background: rgba(255, 255, 255, 0.92);
+      color: var(--text-main);
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 5px 11px;
+      border-radius: var(--radius-pill);
+      letter-spacing: 0.02em;
+      user-select: all;
+      cursor: text;
+    }
 /*-------------------------------NOSOTROS-----------------------------------*/
+
 .titulo-nosotros {
     font-size: clamp(2.3rem, 4.5vw, 3.65rem);
     line-height: 1.08;

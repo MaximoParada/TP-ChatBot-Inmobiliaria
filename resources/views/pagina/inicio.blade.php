@@ -1,15 +1,19 @@
 @extends('layouts.app')
-<!-- se subio el cambio00? -->
+
+@section('title', 'Inicio — LoncoProp Inmobiliaria')
+
 @section('contenido')
 
-  <!-- 1. SECCIÓN HERO -->
-  <header class="hero">
-    <div class="hero-content">
+  <!-- 1. SECCIÓN HERO CENTRADA -->
+  <header class="hero d-flex align-items-center justify-content-center text-center">
+    <div class="container hero-content">
       <h1 class="hero-title">LoncoProp</h1>
-      <p class="hero-subtitle">Comprar o alquilar tu próxima propiedad, de forma simple y segura.</p>
+      <p class="hero-subtitle mx-auto">
+        Comprar o alquilar tu próxima propiedad, de forma simple y segura.
+      </p>
 
       <!-- Barra de filtros rápidos -->
-      <form class="search-bar" method="GET" action="{{ url('/propiedades') }}">
+      <form class="search-bar mx-auto" method="GET" action="{{ url('/propiedades') }}">
         <div class="search-field">
           <select name="operacion" aria-label="Operación">
             <option value="alquiler">Alquilar</option>
@@ -46,12 +50,20 @@
   </header>
 
   <!-- 2. SECCIÓN PROPUESTA Y DESTACADOS -->
-  <div class="showcase" id="propiedades">
-    <div class="showcase-header">
-      <p class="showcase-tag">Te ayudamos a encontrar el espacio ideal sin vueltas.</p>
-      <h2 class="showcase-statement">
+  <section class="container py-5 showcase" id="propiedades" style="max-width: 1140px;">
+    
+    <div class="showcase-header d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-4 mb-5">
+      <h2 class="showcase-statement mb-0">
         Nuestros asesores —y nuestro asistente virtual 24/7— te acompañan en cada paso para garantizar la mejor experiencia inmobiliaria de la ciudad.
       </h2>
+
+      <button type="button" 
+              onclick="toggleChatbot()" 
+              class="btn-bot-showcase flex-shrink-0" 
+              aria-label="Abrir asistente virtual"
+              title="Abrir asistente virtual">
+        <img src="{{ asset('img/lonco-boti.svg') }}" alt="Asistente virtual">
+      </button>
     </div>
 
     <div class="cards-grid">
@@ -122,6 +134,6 @@
         <p class="empty-properties">No hay propiedades disponibles por el momento.</p>
       @endforelse
     </div>
-  </div>
+  </section>
 
 @endsection
