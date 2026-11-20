@@ -1,0 +1,19 @@
+<?php
+/*** 
+use App\Http\Controllers\ChatbotController;
+use App\Http\Controllers\InmobiliariaController;
+use Illuminate\Support\Facades\Route;
+
+// Vistas principales (ajustá el nombre de la vista en InmobiliariaController si no se llama 'inicio')
+Route::get('/', [InmobiliariaController::class, 'inicio'])->name('inicio');
+Route::get('/nosotros', [InmobiliariaController::class, 'nosotros'])->name('nosotros');
+Route::get('/tasaciones', [InmobiliariaController::class, 'tasaciones'])->name('tasaciones');
+
+// Endpoints del Chatbot (BotUI)
+Route::prefix('chatbot')->group(function () {
+    Route::get('/respuesta/{clave}', [ChatbotController::class, 'obtenerRespuesta']);
+    Route::post('/buscar-palabra', [ChatbotController::class, 'buscarPorPalabra']);
+    Route::get('/propiedad/{id}', [ChatbotController::class, 'consultarPropiedad']);
+    Route::post('/visita', [ChatbotController::class, 'agendarVisita']);
+    Route::post('/tasacion', [ChatbotController::class, 'calcularTasacion']);
+});*/
