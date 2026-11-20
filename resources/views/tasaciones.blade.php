@@ -61,7 +61,7 @@
       </form>
     </section>
   </main>
-
+<!--cambiar cod viejo -->
   <script src="{{ asset('js/app.js') }}"></script>
 </body>
 </html>
