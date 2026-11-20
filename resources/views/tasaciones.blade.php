@@ -1,67 +1,119 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tasaciones — LoncoProp</title>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="{{ asset('css/estilos.css') }}">
-</head>
-<body>
+@extends('layouts.app')
 
-  <nav class="navbar">
-    <a href="{{ url('/') }}" class="brand">LoncoProp</a>
-    <ul class="nav-links">
-      <li><a href="{{ url('/') }}#propiedades">Propiedades</a></li>
-      <li><a href="{{ url('/nosotros') }}">Nosotros</a></li>
-      <li><a href="{{ url('/tasaciones') }}">Tasaciones</a></li>
-    </ul>
-  </nav>
+@section('title', 'Tasaciones — LoncoProp Inmobiliaria')
 
-  <main class="container">
-    <section class="about-header">
-      <span class="tag">Tasaciones Online</span>
-      <h1 class="page-title">Conocé el valor real de tu propiedad en pocos minutos.</h1>
-      <p class="page-lead">
-        Nuestros tasadores expertos combinan datos actualizados del mercado inmobiliario local con inteligencia artificial para ofrecerte una cotización precisa.
-      </p>
-    </section>
+@section('contenido')
+<div class="container py-5" style="max-width: 1100px;">
+    <div class="row g-5 align-items-start">
 
-    <section class="form-container">
-      <h2 class="form-title">Solicitar tasación profesional</h2>
-      
-      <form action="{{ route('tasaciones.enviar') }}" method="POST" class="form-group">
-        @csrf
-        <div class="form-field">
-          <label class="form-label">Dirección de la propiedad</label>
-          <input type="text" name="direccion" placeholder="Ej: Av. Argentina 1200" required class="form-input">
+        {{-- COLUMNA IZQUIERDA: Información y pasos --}}
+        <div class="col-12 col-lg-6">
+            <span class="text-uppercase fw-semibold text-muted small d-block mb-2" style="letter-spacing: 0.08em;">
+                Valuación Profesional
+            </span>
+
+            <h1 class="titulo-tasaciones fw-bolder mb-3">
+                Conocé el valor real de tu propiedad.
+            </h1>
+
+            <p class="text-muted fs-6 mb-5">
+                Analizamos la ubicación, metros cuadrados y demanda actual de la zona para entregarte una tasación precisa en menos de 24 horas.
+            </p>
+
+            {{-- Lista de 3 pasos --}}
+            <div class="d-flex align-items-start gap-3 mb-4">
+                <span class="step-circle">1</span>
+                <div>
+                    <h3 class="h6 fw-bold mb-1">Compartí los datos básicos</h3>
+                    <p class="text-muted small mb-0">Indicá tipo de inmueble, barrio y superficie aproximada.</p>
+                </div>
+            </div>
+
+            <div class="d-flex align-items-start gap-3 mb-4">
+                <span class="step-circle">2</span>
+                <div>
+                    <h3 class="h6 fw-bold mb-1">Análisis comparativo</h3>
+                    <p class="text-muted small mb-0">Comparamos valores reales de cierre en tu misma zona.</p>
+                </div>
+            </div>
+
+            <div class="d-flex align-items-start gap-3 mb-5">
+                <span class="step-circle">3</span>
+                <div>
+                    <h3 class="h6 fw-bold mb-1">Informe sin compromiso</h3>
+                    <p class="text-muted small mb-0">Recibís el rango estimado para vender o alquilar rápido.</p>
+                </div>
+            </div>
+
+            {{-- Aviso al chatbot --}}
+            <div class="bg-light rounded-4 p-4 small" role="button" onclick="toggleChatbot()">
+                <strong class="d-block mb-1">¿Preferís hacerlo más rápido?</strong>
+                Abrí nuestro asistente virtual abajo a la derecha y seleccioná <em>"Quiero tasar mi propiedad"</em> para guiarte paso a paso.
+            </div>
         </div>
 
-        <div class="form-field">
-          <label class="form-label">Tipo de inmueble</label>
-          <select name="tipo" class="form-select">
-            <option value="casa">Casa</option>
-            <option value="departamento">Departamento</option>
-            <option value="terreno">Terreno</option>
-            <option value="comercial">Local Comercial</option>
-          </select>
+        {{-- COLUMNA DERECHA: Formulario --}}
+        <div class="col-12 col-lg-6">
+            <div class="form-card bg-white border rounded-4 p-4 p-md-5">
+                <h2 class="h4 fw-bold mb-1">Solicitar tasación</h2>
+                <p class="text-muted small mb-4">Completá los datos y un asesor se comunicará con vos.</p>
+
+                <form id="tasacionForm">
+                    @csrf
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-12 col-sm-6">
+                            <label for="operacion" class="form-label fw-semibold small">Objetivo</label>
+                            <select id="operacion" name="operacion" class="form-select" required>
+                                <option value="venta">Quiero Vender</option>
+                                <option value="alquiler">Quiero Alquilar</option>
+                            </select>
+                        </div>
+
+                        <div class="col-12 col-sm-6">
+                            <label for="tipo" class="form-label fw-semibold small">Tipo de propiedad</label>
+                            <select id="tipo" name="tipo" class="form-select" required>
+                                <option value="departamento">Departamento</option>
+                                <option value="casa">Casa</option>
+                                <option value="terreno">Terreno / Lote</option>
+                                <option value="local">Local Comercial</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-12 col-sm-6">
+                            <label for="zona" class="form-label fw-semibold small">Zona o Barrio</label>
+                            <input type="text" id="zona" name="zona" class="form-control" placeholder="Ej: Centro, Alta Barda..." required>
+                        </div>
+
+                        <div class="col-12 col-sm-6">
+                            <label for="metros" class="form-label fw-semibold small">Superficie aprox. (m²)</label>
+                            <input type="number" id="metros" name="metros" class="form-control" placeholder="Ej: 85" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="nombre" class="form-label fw-semibold small">Tu nombre</label>
+                        <input type="text" id="nombre" name="nombre" class="form-control" placeholder="Nombre y apellido" required>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="contacto" class="form-label fw-semibold small">Teléfono o WhatsApp</label>
+                        <input type="tel" id="contacto" name="contacto" class="form-control" placeholder="+54 299 ..." required>
+                    </div>
+
+                    <button type="submit" class="btn btn-dark w-100 rounded-pill py-3 fw-semibold">
+                        Solicitar valuación gratuita
+                    </button>
+
+                    <div class="alert alert-success mt-3 mb-0 text-center small d-none" id="successMsg" role="alert">
+                        ¡Solicitud recibida! Un asesor analizará los datos de tu propiedad y te contactará a la brevedad.
+                    </div>
+                </form>
+            </div>
         </div>
 
-        <div class="form-field">
-          <label class="form-label">Superficie aproximada (m2)</label>
-          <input type="number" name="superficie" placeholder="Ej: 80" required class="form-input">
-        </div>
-
-        <div class="form-field">
-          <label class="form-label">Correo electrónico de contacto</label>
-          <input type="email" name="email" placeholder="tu@email.com" required class="form-input">
-        </div>
-
-        <button type="submit" class="form-button">Enviar solicitud de tasacion</button>
-      </form>
-    </section>
-  </main>
-<!--cambiar cod viejo -->
-  <script src="{{ asset('js/app.js') }}"></script>
-</body>
-</html>
+    </div>
+</div>
+@endsection
