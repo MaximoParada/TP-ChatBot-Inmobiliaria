@@ -1,4 +1,4 @@
-@extends('layout.app')
+@extends('layouts.app')
 <!-- se subio el cambio00? -->
 @section('contenido')
 

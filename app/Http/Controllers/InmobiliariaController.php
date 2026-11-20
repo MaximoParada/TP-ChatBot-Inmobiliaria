@@ -32,18 +32,18 @@ class InmobiliariaController extends Controller
         $propiedades = $query->get();
 
         // Nota: después ajustamos el nombre de la vista si hace falta
-        return view('inicio', compact('propiedades'));
+        return view('pagina.inicio', compact('propiedades'));
     }
 
     // Vista Nosotros
     public function nosotros()
     {
-        return view('nosotros');
+        return view('pagina.nosotros');
     }
 
     // Vista Tasaciones
     public function tasaciones()
     {
-        return view('tasaciones');
+        return view('pagina.tasaciones');
     }
 }
