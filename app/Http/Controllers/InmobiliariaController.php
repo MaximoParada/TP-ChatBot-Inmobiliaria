@@ -30,8 +30,8 @@ class InmobiliariaController extends Controller
         }
 
         $propiedades = $query->get();
-
-        // Nota: después ajustamos el nombre de la vista si hace falta
+        
+        //vista inicio
         return view('pagina.inicio', compact('propiedades'));
     }
 

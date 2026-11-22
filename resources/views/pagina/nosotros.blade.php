@@ -98,7 +98,7 @@
     <section class="nosotros-cta text-center text-white mt-5">
         <h2 class="fw-bold mb-3">¿Tenés dudas sobre cómo empezar?</h2>
         <p class="mx-auto mb-4">
-            Probá nuestro asistente virtual en la esquina inferior derecha o iniciá una consulta guiada ahora mismo.
+            Probá nuestro asistente virtual en la esquina superior derecha o iniciá una consulta guiada ahora mismo.
         </p>
         <button type="button" onclick="toggleChatbot()" class="btn btn-light rounded-pill px-4 py-3 fw-semibold btn-nosotros-cta">
             Iniciar consulta en el chat

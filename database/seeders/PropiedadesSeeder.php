@@ -23,7 +23,7 @@ class PropiedadesSeeder extends Seeder
                 'ambientes' => 2,
                 'dormitorios' => 1,
                 'metros_cuadrados' => 45,
-                'precio' => 1500000.00,
+                'precio' => 15000000.00,
                 'expensas' => 315000.00,
                 'imagenes' => json_encode([
                     'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=800&q=80',
