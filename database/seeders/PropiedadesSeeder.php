@@ -61,7 +61,7 @@ class PropiedadesSeeder extends Seeder
             ],
             [
                 'id' => 103,
-                'titulo' => 'Casa en ventaaaaa',
+                'titulo' => 'Casa en ventaaaaa xd lol',
                 'operacion' => 'venta',
                 'direccion' => 'Bardas Soleadas 180 - Neuquén',
                 'zona' => 'Alta Barda',
