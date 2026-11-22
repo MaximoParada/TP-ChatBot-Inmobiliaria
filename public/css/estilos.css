@@ -888,3 +888,186 @@
         text-align: center;
     }
 }
+
+/* =========================================================
+   ESTILOS DEL CHATBOT (LONCOBOTI)
+   ========================================================= */
+
+/* 1. Botón del Asistente Virtual en el Navbar (círculo claro, grande y llamativo) */
+.btn-bot-navbar {
+    background: transparent;
+    border: none;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+    padding: 4px 8px;
+    transition: transform 0.2s ease;
+}
+
+.btn-bot-navbar:hover {
+    transform: translateY(-2px);
+}
+
+.btn-bot-navbar-circulo {
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    background-color: #ffffff;
+    border: 0px solid #111111;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.btn-bot-navbar:hover .btn-bot-navbar-circulo {
+    background-color: #f8f9fa;
+    transform: scale(1.06);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.btn-bot-navbar:active .btn-bot-navbar-circulo {
+    transform: scale(0.96);
+}
+
+.btn-bot-navbar-circulo img {
+    width: 36px;
+    height: 36px;
+}
+
+.btn-bot-navbar-texto {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #111111;
+    line-height: 1;
+}
+
+/* 2. Botón grande y llamativo del Inicio */
+.btn-bot-inicio {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 18px 38px;
+    border-radius: 50px;
+    background-color: #111111;
+    color: #ffffff;
+    border: 2px solid #111111;
+    font-size: 1.1rem;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.18);
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+    animation: pulsoSuave 2.5s infinite;
+}
+
+.btn-bot-inicio:hover {
+    background-color: #292929;
+    transform: translateY(-3px) scale(1.03);
+    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.26);
+}
+
+.btn-bot-inicio:active {
+    transform: scale(0.97);
+}
+
+@keyframes pulsoSuave {
+    0% { box-shadow: 0 0 0 0 rgba(17, 17, 17, 0.25); }
+    70% { box-shadow: 0 0 0 15px rgba(17, 17, 17, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(17, 17, 17, 0); }
+}
+
+/* 3. Caja exterior de la ventana del chat */
+.ventana-bot {
+    position: fixed;
+    top: 98px;
+    right: 24px;
+    width: 350px;
+    max-width: calc(100vw - 48px);
+    height: 450px;
+    background-color: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 20px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    z-index: 1050;
+}
+
+.ventana-bot-header {
+    background-color: #111111;
+    color: #ffffff;
+}
+
+.ventana-bot-body {
+    flex: 1;
+    overflow-y: auto;
+    background-color: #f8f9fa;
+}
+
+/* 4. Adaptación de colores de BotUI al estilo de LoncoProp */
+.botui-container {
+    background-color: transparent;
+    font-family: inherit;
+}
+
+.botui-message-content {
+    background-color: #ffffff;
+    color: #111111;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    font-size: 0.88rem;
+}
+
+.botui-message-content.human {
+    background-color: #111111;
+    color: #ffffff;
+    border: none;
+}
+
+.botui-actions-buttons-button {
+    background-color: #111111;
+    color: #ffffff;
+    border-radius: 20px;
+    font-size: 0.82rem;
+    box-shadow: none;
+}
+
+.botui-actions-buttons-button:hover {
+    background-color: #333333;
+}
+
+.botui-actions-text-input {
+    border-bottom: 1px solid #111111;
+    font-size: 0.88rem;
+}
+
+
+/* Lista de sugerencias en vivo arriba del input de BotUI */
+.sugerencias-chat {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 10px;
+}
+
+.btn-sugerencia-chat {
+    background-color: #ffffff;
+    color: #111111;
+    border: 1px solid #111111;
+    border-radius: 12px;
+    padding: 7px 12px;
+    font-size: 0.82rem;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.btn-sugerencia-chat:hover {
+    background-color: #111111;
+    color: #ffffff;
+}

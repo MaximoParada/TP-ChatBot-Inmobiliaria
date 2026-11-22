@@ -57,12 +57,8 @@
         Nuestros asesores —y nuestro asistente virtual 24/7— te acompañan en cada paso para garantizar la mejor experiencia inmobiliaria de la ciudad.
       </h2>
 
-      <button type="button" 
-              onclick="toggleChatbot()" 
-              class="btn-bot-showcase flex-shrink-0" 
-              aria-label="Abrir asistente virtual"
-              title="Abrir asistente virtual">
-        <img src="{{ asset('img/lonco-boti.svg') }}" alt="Asistente virtual">
+      <button type="button" class="btn-bot-inicio" onclick="toggleChatbot()">
+       Nuestro asistente virtual
       </button>
     </div>
 

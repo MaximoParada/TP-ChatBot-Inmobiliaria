@@ -15,9 +15,11 @@
             </li>
         </ul>
 
-        <button type="button" id="btn-asistente-navbar" onclick="abrirAsistente()" class="lp-btn-asistente">
-            <img src="{{ asset('img/lonco-boti.svg') }}" alt="Asistente virtual" class="lp-btn-asistente-icon">
-            <span class="lp-btn-asistente-text">Asistente virtual</span>
-        </button>
+        <button type="button" class="btn-bot-navbar" onclick="toggleChatbot()">
+         <span class="btn-bot-navbar-circulo">
+        <img src="{{ asset('img/lonco-boti.svg') }}" alt="LoncoBoti">
+    </span>
+    <span class="btn-bot-navbar-texto">Asistente virtual</span>
+</button>
     </nav>
 </header>
