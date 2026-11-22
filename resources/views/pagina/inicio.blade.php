@@ -13,9 +13,10 @@
       </p>
 
       <!-- Barra de filtros rápidos -->
-      <form class="search-bar mx-auto" method="GET" action="{{ url('/propiedades') }}">
+      <form id="form-buscador" class="search-bar mx-auto" method="GET" action="{{ route('propiedades.filtrar') }}">
         <div class="search-field">
           <select name="operacion" aria-label="Operación">
+            <option value="">Operación</option>
             <option value="alquiler">Alquilar</option>
             <option value="venta">Comprar</option>
           </select>
@@ -23,9 +24,9 @@
         <div class="search-field">
           <select name="zona" aria-label="Zona">
             <option value="">Zona / Barrio</option>
-            <option value="centro">Centro</option>
-            <option value="este">Zona Este</option>
-            <option value="norte">Alta Barda</option>
+            <option value="Centro">Centro</option>
+            <option value="Zona Este">Zona Este</option>
+            <option value="Alta Barda">Alta Barda</option>
           </select>
         </div>
         <div class="search-field">
@@ -58,11 +59,11 @@
       </h2>
 
       <button type="button" class="btn-bot-inicio" onclick="toggleChatbot()">
-       Nuestro asistente virtual
+        Nuestro asistente virtual
       </button>
     </div>
 
-    <div class="cards-grid">
+    <div class="cards-grid" id="contenedor-tarjetas">
       @forelse (($propiedades ?? collect())->unique('id') as $propiedad)
         <article class="property-card" data-id="{{ $propiedad->id }}">
           <!-- Carrusel de imágenes -->
@@ -129,6 +130,13 @@
       @empty
         <p class="empty-properties">No hay propiedades disponibles por el momento.</p>
       @endforelse
+    </div>
+
+    <!-- Botón para volver a ver todas las propiedades cuando hay resultados filtrados -->
+    <div id="accion-reset-filtros" class="text-center mt-4 d-none">
+      <button type="button" id="btn-ver-todas" class="btn-search">
+        Ver todas las propiedades
+      </button>
     </div>
   </section>
 
