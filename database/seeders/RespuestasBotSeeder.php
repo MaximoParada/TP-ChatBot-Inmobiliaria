@@ -52,7 +52,7 @@ class RespuestasBotSeeder extends Seeder
             [
                 'clave' => 'contacto_info',
                 'titulo' => 'Contacto y horarios',
-                'contenido' => "• Ubicación: Neuquén Capital, Argentina.\n• Teléfono / WhatsApp: +54 299 555-0148.\n• Email: hola@nexoprop.com.ar\n• Horario de atención: Lunes a viernes de 8:00 a 16:00 hs.",
+                'contenido' => "• Ubicación: Neuquén Capital, Argentina.\n• Teléfono / WhatsApp: +54 299 555-0148.\n• Email: contacto@loncoprop.com.ar\n• Horario de atención: Lunes a viernes de 8:00 a 16:00 hs.",
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
