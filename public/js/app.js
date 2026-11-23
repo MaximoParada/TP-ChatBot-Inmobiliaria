@@ -107,13 +107,13 @@ document.addEventListener('DOMContentLoaded', function () {
 // 1. Inicializamos BotUI conectándolo con el <div id="lonco-botui"> de app.blade.php
 const botui = new BotUI('lonco-botui');
 let yaSaludo = false;
+let idBusquedaActual = 0; // Evita que respuestas viejas se acumulen al escribir rápido
 
 // 2. Abre y cierra la ventana del chat al tocar los botones de la página
 function toggleChatbot() {
     const ventana = document.getElementById('ventanaChatbot');
     ventana.classList.toggle('d-none');
 
-    // Si la ventana se abre por primera vez, inicia la conversación
     if (!ventana.classList.contains('d-none') && !yaSaludo) {
         yaSaludo = true;
         iniciarConversacion();
@@ -150,6 +150,8 @@ async function iniciarConversacion() {
 
 // 5. Menú principal con tus palabras clave, "Otra pregunta" y "Salir del chat"
 async function mostrarMenu(pregunta) {
+    limpiarExtrasInput();
+
     await botui.message.add({
         delay: 400,
         loading: true,
@@ -169,7 +171,6 @@ async function mostrarMenu(pregunta) {
         ]
     });
 
-    // Según el botón que tocó el usuario, ejecutamos el camino correspondiente
     if (opcion.value === 'salir') {
         salirDelChat();
     } else if (opcion.value === 'otra_pregunta') {
@@ -181,11 +182,21 @@ async function mostrarMenu(pregunta) {
     }
 }
 
-// 6. Cierra la ventana del chat y limpia los mensajes para la próxima vez
+// 6. Cierra la ventana del chat y limpia todo para la próxima vez
 function salirDelChat() {
+    idBusquedaActual++;
+    limpiarExtrasInput();
     document.getElementById('ventanaChatbot').classList.add('d-none');
     botui.message.removeAll();
     yaSaludo = false;
+}
+
+// Borra sugerencias y botones auxiliares viejos para que nunca queden sueltos
+function limpiarExtrasInput() {
+    const viejos = document.querySelectorAll('.sugerencias-chat, .contenedor-volver-chat');
+    for (let i = 0; i < viejos.length; i++) {
+        viejos[i].remove();
+    }
 }
 
 // 7. Busca una respuesta en la tabla 'respuestas_bot' usando la clave del botón
@@ -194,71 +205,104 @@ async function verRespuesta(clave) {
     const datos = await respuesta.json();
 
     if (datos.ok) {
-        // Reemplazamos los saltos de línea (\n) por <br> para que se vea ordenado
         const textoOrdenado = datos.contenido.replace(/\n/g, '<br>');
         await botui.message.add({ type: 'html', delay: 400, loading: true, content: textoOrdenado });
     } else {
         await botui.message.add({ delay: 300, content: datos.mensaje });
     }
 
-    // Al terminar de responder, vuelve a ofrecer las opciones iniciales
     mostrarMenu('¿Te puedo ayudar en algo más?');
 }
 
-// 8. Flujo cuando el usuario toca "Otra pregunta": habilita escribir y muestra sugerencias en vivo
+// 8. Flujo cuando el usuario toca "Otra pregunta": permite escribir, elegir sugerencias o volver atrás
 async function flujoOtraPregunta() {
+    let yaRespondio = false;
+    limpiarExtrasInput();
+
     await botui.message.add({
         delay: 300,
         content: 'Escribí tu consulta (o tocá una sugerencia mientras escribís):'
     });
 
-    // Mostramos la caja de texto nativa de BotUI
     const promesaEscritura = botui.action.text({
         action: { placeholder: 'Ej: alquiler, comprar, horarios...' }
     });
 
-    // Activamos el buscador en vivo sobre el input que acaba de crear BotUI
-    activarSugerenciasEnVivo();
-
-    // Si el usuario aprieta Enter sin tocar ninguna sugerencia, procesamos lo que escribió
-    const escritura = await promesaEscritura;
-    procesarTextoEscrito(escritura.value);
-}
-
-// 9. Escucha cada letra que escribe el usuario y muestra botones clicables arriba del input
-function activarSugerenciasEnVivo() {
-    setTimeout(function () {
+    // Esperamos a que BotUI dibuje el cuadro de texto
+    const intervalo = setInterval(function () {
         const inputBot = document.querySelector('.botui-actions-text-input');
         const contenedorAcciones = document.querySelector('.botui-actions-container');
         if (!inputBot || !contenedorAcciones) return;
 
-        // Creamos la cajita donde van a aparecer las preguntas sugeridas
+        clearInterval(intervalo);
+        limpiarExtrasInput();
+        inputBot.focus();
+
+        // Caja limpia donde se dibujan solo las sugerencias actuales
         const cajaSugerencias = document.createElement('div');
         cajaSugerencias.className = 'sugerencias-chat';
         contenedorAcciones.prepend(cajaSugerencias);
 
-        // Cada vez que el usuario escribe una letra, buscamos coincidencias en la BD
+        // Botón para cancelar la pregunta y volver al menú principal
+        const cajaVolver = document.createElement('div');
+        cajaVolver.className = 'contenedor-volver-chat';
+        const btnVolver = document.createElement('button');
+        btnVolver.type = 'button';
+        btnVolver.className = 'btn-volver-chat';
+        btnVolver.textContent = '← Volver al menú';
+
+        btnVolver.onclick = async function () {
+            yaRespondio = true;
+            idBusquedaActual++;
+            limpiarExtrasInput();
+            botui.action.hide();
+            await botui.message.add({ human: true, content: 'Volver al menú' });
+            mostrarMenu('¿En qué te puedo ayudar?');
+        };
+
+        cajaVolver.appendChild(btnVolver);
+        contenedorAcciones.appendChild(cajaVolver);
+
+        // Escucha cada letra que escribe el usuario sin duplicar resultados
         inputBot.addEventListener('input', async function () {
             const texto = inputBot.value.trim();
+            const estaBusqueda = ++idBusquedaActual;
+
+            if (texto.length < 2) {
+                cajaSugerencias.innerHTML = '';
+                return;
+            }
+
+            const datos = await enviarPost('/chatbot/buscar-palabra', { texto: texto });
+
+            // Si el usuario siguió escribiendo mientras llegaba esta respuesta, la descartamos
+            if (estaBusqueda !== idBusquedaActual || yaRespondio) return;
+
+            // Limpiamos la caja justo antes de dibujar las opciones nuevas
             cajaSugerencias.innerHTML = '';
-
-            if (texto.length < 2) return;
-
-            const datos = await enviarPost('/chatbot/buscar', { texto: texto });
             if (!datos.ok) return;
 
-            // Si hay varias palabras clave parecidas, creamos un botón por cada una
             if (datos.tipo === 'sugerencias') {
+                const mostradas = [];
                 for (let i = 0; i < datos.sugerencias.length; i++) {
                     const item = datos.sugerencias[i];
+                    const textoBoton = item.palabra || item.titulo;
+
+                    // Evitamos dibujar dos botones con exactamente el mismo texto
+                    if (mostradas.includes(textoBoton)) continue;
+                    mostradas.push(textoBoton);
+
                     const boton = document.createElement('button');
                     boton.type = 'button';
                     boton.className = 'btn-sugerencia-chat';
-                    boton.textContent = item.palabra;
+                    boton.textContent = textoBoton;
 
                     boton.onclick = async function () {
+                        yaRespondio = true;
+                        idBusquedaActual++;
+                        limpiarExtrasInput();
                         botui.action.hide();
-                        await botui.message.add({ human: true, content: item.palabra });
+                        await botui.message.add({ human: true, content: textoBoton });
                         verRespuesta(item.clave);
                     };
 
@@ -266,16 +310,19 @@ function activarSugerenciasEnVivo() {
                 }
             }
 
-            // Si hay una sola coincidencia exacta, mostramos ese botón directo
             if (datos.tipo === 'respuesta_unica') {
+                const textoBoton = datos.palabra || datos.titulo;
                 const boton = document.createElement('button');
                 boton.type = 'button';
                 boton.className = 'btn-sugerencia-chat';
-                boton.textContent = datos.titulo;
+                boton.textContent = textoBoton;
 
                 boton.onclick = async function () {
+                    yaRespondio = true;
+                    idBusquedaActual++;
+                    limpiarExtrasInput();
                     botui.action.hide();
-                    await botui.message.add({ human: true, content: datos.titulo });
+                    await botui.message.add({ human: true, content: textoBoton });
                     const textoOrdenado = datos.contenido.replace(/\n/g, '<br>');
                     await botui.message.add({ type: 'html', delay: 400, loading: true, content: textoOrdenado });
                     mostrarMenu('¿Te puedo ayudar en algo más?');
@@ -285,13 +332,21 @@ function activarSugerenciasEnVivo() {
             }
         });
     }, 50);
+
+    // Si el usuario apretó Enter o tocó el ícono ➤ en lugar de elegir una sugerencia
+    const escritura = await promesaEscritura;
+    if (yaRespondio) return;
+
+    yaRespondio = true;
+    idBusquedaActual++;
+    limpiarExtrasInput();
+    procesarTextoEscrito(escritura.value);
 }
 
-// 10. Procesa el texto si el usuario apretó Enter en lugar de tocar una sugerencia
+// 9. Procesa el texto enviado con Enter o con el botón ➤
 async function procesarTextoEscrito(texto) {
-    const datos = await enviarPost('/chatbot/buscar', { texto: texto });
+    const datos = await enviarPost('/chatbot/buscar-palabra', { texto: texto });
 
-    // Si no entendió o no encontró ninguna palabra clave en la base de datos
     if (!datos.ok) {
         await botui.message.add({
             type: 'html',
@@ -305,7 +360,6 @@ async function procesarTextoEscrito(texto) {
         return;
     }
 
-    // Si encontró una coincidencia única, muestra la respuesta directamente
     if (datos.tipo === 'respuesta_unica') {
         const textoOrdenado = datos.contenido.replace(/\n/g, '<br>');
         await botui.message.add({ type: 'html', delay: 400, loading: true, content: textoOrdenado });
@@ -313,11 +367,10 @@ async function procesarTextoEscrito(texto) {
         return;
     }
 
-    // Si encontró varias coincidencias, muestra los botones para que elija
     const botones = [];
     for (let i = 0; i < datos.sugerencias.length; i++) {
         botones.push({
-            text: datos.sugerencias[i].titulo,
+            text: datos.sugerencias[i].palabra || datos.sugerencias[i].titulo,
             value: datos.sugerencias[i].clave
         });
     }
@@ -327,7 +380,7 @@ async function procesarTextoEscrito(texto) {
     verRespuesta(elegida.value);
 }
 
-// 11. Flujo paso a paso para agendar una visita a una propiedad
+// 10. Flujo paso a paso para agendar una visita a una propiedad
 async function flujoVisita() {
     await botui.message.add({ delay: 300, content: 'Ingresá el código de la propiedad (ej: 101, 102, 103):' });
     const codigo = await botui.action.text({ action: { placeholder: 'Código...' } });
@@ -347,7 +400,6 @@ async function flujoVisita() {
         content: '<strong>' + prop.titulo + '</strong><br>Dirección: ' + prop.direccion
     });
 
-    // Si la propiedad tiene horarios cargados, los muestra como botones; si no, pide escribir
     let horarioElegido = '';
     if (prop.horarios_visita && prop.horarios_visita.length > 0) {
         const botonesHorarios = [];
@@ -380,7 +432,7 @@ async function flujoVisita() {
     mostrarMenu('¿Te puedo ayudar en algo más?');
 }
 
-// 12. Conexión automática cuando se envía el formulario de Tasaciones
+// 11. Conexión automática cuando se envía el formulario de Tasaciones
 document.addEventListener('DOMContentLoaded', function () {
     const formularioTasacion = document.getElementById('tasacionForm');
     if (!formularioTasacion) return;
@@ -396,7 +448,6 @@ document.addEventListener('DOMContentLoaded', function () {
             metros_cuadrados: formData.get('metros_cuadrados')
         };
 
-        // Abre el chat automáticamente si estaba oculto
         const ventana = document.getElementById('ventanaChatbot');
         if (ventana.classList.contains('d-none')) {
             ventana.classList.remove('d-none');

@@ -2,18 +2,14 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
 class RespuestasBotSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        DB::table('respuestas_bot')->insert([
+        $respuestas = [
             [
                 'clave' => 'alquiler_pasos',
                 'titulo' => 'Pasos para alquilar',
@@ -56,6 +52,20 @@ class RespuestasBotSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
-        ]);
+            [
+                'clave' => 'coordinar_visitas',
+                'titulo' => 'Coordinar visitas',
+                'contenido' => "• Si querés coordinar una visita, volvé al menú de inicio del chatbot y tocá la opción -Agendar visita. Te pediremos el id del departamento, qué fecha y horarios te quedan cómodos, tu nombre y tu teléfono.",
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+        ];
+
+        // Si la 'clave' ya existe, actualiza título y contenido; si no existe, la inserta
+        DB::table('respuestas_bot')->upsert(
+            $respuestas,
+            ['clave'],
+            ['titulo', 'contenido', 'updated_at']
+        );
     }
 }
