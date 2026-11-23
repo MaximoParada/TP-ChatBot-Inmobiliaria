@@ -1,79 +1,239 @@
-
-
-
-
 //-----------------------------------------INICIO-----------------------------------------------//
 
-
 document.addEventListener('DOMContentLoaded', () => {
-  const formBusqueda = document.querySelector('.search-bar');
-  const tarjetasPropiedades = document.querySelectorAll('.property-card');
+  const formBuscador = document.getElementById('form-buscador');
+  const contenedorTarjetas = document.getElementById('contenedor-tarjetas');
+  const accionReset = document.getElementById('accion-reset-filtros');
+  const btnVerTodas = document.getElementById('btn-ver-todas');
+  const seccionAncla = document.getElementById('propiedades');
 
-  if (formBusqueda) {
-    formBusqueda.addEventListener('submit', (evento) => {
-      evento.preventDefault();
+  inicializarCarruseles(document);
+  vincularClickTarjetas(document);
 
-      const selects = formBusqueda.querySelectorAll('select');
-      const filtros = {
-        operacion: selects[0]?.value || '',
-        zona: selects[1]?.value || '',
-        ambientes: selects[2]?.value || '',
-        presupuesto: selects[3]?.value || ''
-      };
+  if (!formBuscador || !contenedorTarjetas) return;
 
-      console.log('Filtros seleccionados:', filtros);
-    });
+  const hayFiltrosActivos = () => {
+    const formData = new FormData(formBuscador);
+    for (const [, valor] of formData.entries()) {
+      if (valor.trim() !== '') return true;
+    }
+    return false;
+  };
+
+  const actualizarBotonVerTodas = (cantidadResultados) => {
+    if (!accionReset) return;
+    if (hayFiltrosActivos() && cantidadResultados > 0) {
+      accionReset.classList.remove('d-none');
+    } else {
+      accionReset.classList.add('d-none');
+    }
+  };
+
+  const limpiarFiltrosYRecargar = () => {
+    formBuscador.reset();
+    if (accionReset) accionReset.classList.add('d-none');
+    ejecutarBusqueda('');
+  };
+
+  if (btnVerTodas) {
+    btnVerTodas.addEventListener('click', limpiarFiltrosYRecargar);
   }
 
-  tarjetasPropiedades.forEach((tarjeta) => {
-    tarjeta.addEventListener('click', () => {
-      const titulo = tarjeta.querySelector('.card-title')?.textContent.trim();
-      const ubicacion = tarjeta.querySelector('.card-location')?.textContent.trim();
+  const ejecutarBusqueda = async (paramsString = '') => {
+    const url = `${formBuscador.action}${paramsString ? '?' + paramsString : ''}`;
+    const btnBuscar = formBuscador.querySelector('.btn-search');
+    const textoOriginal = btnBuscar ? btnBuscar.textContent : 'Buscar ahora';
 
-      console.log(`Propiedad seleccionada: ${titulo} - ${ubicacion}`);
-    });
+    if (btnBuscar) {
+      btnBuscar.disabled = true;
+      btnBuscar.textContent = 'Buscando...';
+    }
+
+    try {
+      const response = await fetch(url, {
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest',
+          'Accept': 'application/json',
+        },
+      });
+
+      if (!response.ok) throw new Error('Error al filtrar propiedades');
+
+      const data = await response.json();
+
+      if (Array.isArray(data)) {
+        contenedorTarjetas.innerHTML = renderizarTarjetasDesdeJson(data);
+        actualizarBotonVerTodas(data.length);
+      } else if (typeof data.html === 'string') {
+        contenedorTarjetas.innerHTML = data.html;
+        const cantCards = contenedorTarjetas.querySelectorAll('.property-card').length;
+        actualizarBotonVerTodas(cantCards);
+      }
+
+      inicializarCarruseles(contenedorTarjetas);
+      vincularClickTarjetas(contenedorTarjetas);
+
+      const btnLimpiarVacio = document.getElementById('btn-limpiar-filtros');
+      if (btnLimpiarVacio) {
+        btnLimpiarVacio.addEventListener('click', limpiarFiltrosYRecargar);
+      }
+
+      if (seccionAncla) {
+        seccionAncla.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    } catch (error) {
+      console.error('Error al filtrar propiedades:', error);
+    } finally {
+      if (btnBuscar) {
+        btnBuscar.disabled = false;
+        btnBuscar.textContent = textoOriginal;
+      }
+    }
+  };
+
+  formBuscador.addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    const formData = new FormData(formBuscador);
+    const params = new URLSearchParams();
+
+    for (const [clave, valor] of formData.entries()) {
+      if (valor.trim() !== '') {
+        params.append(clave, valor);
+      }
+    }
+
+    ejecutarBusqueda(params.toString());
   });
 });
 
-/* --- Carrusel en tarjetas de propiedades (Inicio) --- */
-  const carruseles = document.querySelectorAll('.card-carousel');
+function vincularClickTarjetas(scope) {
+  const tarjetas = scope.querySelectorAll('.property-card');
 
-  carruseles.forEach((carrusel) => {
-    const slides = carrusel.querySelectorAll('.carousel-slide');
-    const dots = carrusel.querySelectorAll('.carousel-dot');
-    const btnPrev = carrusel.querySelector('.carousel-btn.prev');
-    const btnNext = carrusel.querySelector('.carousel-btn.next');
+  tarjetas.forEach((tarjeta) => {
+    tarjeta.addEventListener('click', () => {
+      const titulo = tarjeta.querySelector('.card-title')?.textContent.trim();
+      const ubicacion = tarjeta.querySelector('.card-location')?.textContent.trim();
+      console.log(`Propiedad seleccionada: ${titulo} - ${ubicacion}`);
+    });
+  });
+}
+
+function inicializarCarruseles(scope) {
+  const carousels = scope.querySelectorAll('.card-carousel');
+
+  carousels.forEach((carousel) => {
+    const slides = carousel.querySelectorAll('.carousel-slide');
+    const dots = carousel.querySelectorAll('.carousel-dot');
+    const prevBtn = carousel.querySelector('.carousel-btn.prev');
+    const nextBtn = carousel.querySelector('.carousel-btn.next');
 
     if (slides.length <= 1) return;
 
-    const mostrarSlide = (nuevoIndice) => {
-      const total = slides.length;
-      const indice = (nuevoIndice + total) % total;
+    let currentIndex = 0;
 
-      slides.forEach((slide, i) => slide.classList.toggle('active', i === indice));
-      dots.forEach((dot, i) => dot.classList.toggle('active', i === indice));
-      carrusel.dataset.index = String(indice);
+    const showSlide = (index) => {
+      currentIndex = (index + slides.length) % slides.length;
+      slides.forEach((slide, i) => slide.classList.toggle('active', i === currentIndex));
+      dots.forEach((dot, i) => dot.classList.toggle('active', i === currentIndex));
+      carousel.dataset.index = String(currentIndex);
     };
 
-    btnPrev?.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const actual = Number(carrusel.dataset.index || 0);
-      mostrarSlide(actual - 1);
-    });
+    if (prevBtn) {
+      prevBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        showSlide(currentIndex - 1);
+      });
+    }
 
-    btnNext?.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const actual = Number(carrusel.dataset.index || 0);
-      mostrarSlide(actual + 1);
-    });
+    if (nextBtn) {
+      nextBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        showSlide(currentIndex + 1);
+      });
+    }
 
-    dots.forEach((dot) => {
+    dots.forEach((dot, i) => {
       dot.addEventListener('click', (e) => {
         e.stopPropagation();
-        mostrarSlide(Number(dot.dataset.slide || 0));
+        showSlide(i);
       });
     });
   });
+}
+
+function renderizarTarjetasDesdeJson(propiedades) {
+  if (!Array.isArray(propiedades) || !propiedades.length) {
+    return `
+      <div class="empty-properties">
+        <p>No encontramos propiedades que coincidan con los filtros seleccionados.</p>
+        <button type="button" id="btn-limpiar-filtros" class="btn-search mt-3">
+          Ver todas las propiedades
+        </button>
+      </div>
+    `;
+  }
+
+  return propiedades.map((prop) => {
+    let imagenes = prop.imagenes_lista || prop.imagenes || ['img/sin-imagen.jpg'];
+    if (typeof imagenes === 'string') {
+      try { imagenes = JSON.parse(imagenes); } catch { imagenes = ['img/sin-imagen.jpg']; }
+    }
+    if (!Array.isArray(imagenes) || !imagenes.length) {
+      imagenes = ['img/sin-imagen.jpg'];
+    }
+
+    const slidesHtml = imagenes.map((ruta, idx) => {
+      const src = /^https?:\/\//i.test(ruta) ? ruta : `/${ruta.replace(/^\/+/, '')}`;
+      return `<img src="${src}" alt="${prop.titulo} - Imagen ${idx + 1}" class="carousel-slide ${idx === 0 ? 'active' : ''}">`;
+    }).join('');
+
+    const controlesHtml = imagenes.length > 1 ? `
+      <button type="button" class="carousel-btn prev" aria-label="Imagen anterior">❮</button>
+      <button type="button" class="carousel-btn next" aria-label="Imagen siguiente">❯</button>
+      <div class="carousel-dots">
+        ${imagenes.map((_, idx) => `<button type="button" class="carousel-dot ${idx === 0 ? 'active' : ''}" data-slide="${idx}" aria-label="Ir a imagen ${idx + 1}"></button>`).join('')}
+      </div>
+    ` : '';
+
+    const precioFormateado = Number(prop.precio || 0).toLocaleString('es-AR');
+    const expensasHtml = prop.expensas && Number(prop.expensas) > 0
+      ? `<span class="card-expensas">+ $${Number(prop.expensas).toLocaleString('es-AR')} expensas</span>`
+      : `<span class="card-expensas">Sin expensas</span>`;
+
+    const opTexto = prop.operacion ? prop.operacion.charAt(0).toUpperCase() + prop.operacion.slice(1) : '';
+    const ambTexto = `${prop.ambientes} ${Number(prop.ambientes) === 1 ? 'ambiente' : 'ambientes'}`;
+    const dormTexto = Number(prop.dormitorios || 0) === 0
+      ? 'Monoambiente'
+      : `${prop.dormitorios} ${Number(prop.dormitorios) === 1 ? 'dormitorio' : 'dormitorios'}`;
+
+    return `
+      <article class="property-card" data-id="${prop.id}">
+        <div class="card-img-wrapper card-carousel" data-index="0">
+          <span class="badge-operacion">${opTexto}</span>
+          <span class="badge-id">ID #${prop.id}</span>
+          <div class="carousel-track">${slidesHtml}</div>
+          ${controlesHtml}
+        </div>
+        <div class="card-body">
+          <div class="card-price-row">
+            <span class="card-price">$${precioFormateado}</span>
+            ${expensasHtml}
+          </div>
+          <h3 class="card-title">${prop.titulo}</h3>
+          <p class="card-location">${prop.direccion} — ${prop.zona}</p>
+          <div class="card-specs">
+            <span>${ambTexto}</span>
+            <span>•</span>
+            <span>${dormTexto}</span>
+            <span>•</span>
+            <span>${prop.metros_cuadrados} m²</span>
+          </div>
+        </div>
+      </article>
+    `;
+  }).join('');
+}
 
 
 //-------------------------------------NOSOTROS--------------------------------------------------//
@@ -89,14 +249,12 @@ document.addEventListener('DOMContentLoaded', function () {
         formTasacion.addEventListener('submit', function (e) {
             e.preventDefault();
 
-            // Datos capturados del formulario (para usar con el chatbot después)
             const nombre = document.getElementById('nombre').value;
             const operacion = document.getElementById('operacion').value;
             const tipo = document.getElementById('tipo').value;
             const zona = document.getElementById('zona').value;
             const metros = document.getElementById('metros').value;
 
-            // Muestra la alerta verde de confirmación y limpia los campos
             successMsg.classList.remove('d-none');
             formTasacion.reset();
         });

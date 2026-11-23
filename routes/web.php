@@ -4,10 +4,13 @@ use App\Http\Controllers\ChatbotController;
 use App\Http\Controllers\InmobiliariaController;
 use Illuminate\Support\Facades\Route;
 
-// Vistas principales (ajustá el nombre de la vista en InmobiliariaController si no se llama 'inicio')
+// Vistas principales
 Route::get('/', [InmobiliariaController::class, 'inicio'])->name('inicio');
 Route::get('/nosotros', [InmobiliariaController::class, 'nosotros'])->name('nosotros');
 Route::get('/tasaciones', [InmobiliariaController::class, 'tasaciones'])->name('tasaciones');
+
+// Filtro AJAX del buscador
+Route::get('/propiedades/filtrar', [InmobiliariaController::class, 'filtrar'])->name('propiedades.filtrar');
 
 // Endpoints del Chatbot (BotUI)
 Route::prefix('chatbot')->group(function () {
