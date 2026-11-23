@@ -236,30 +236,7 @@ function renderizarTarjetasDesdeJson(propiedades) {
 }
 
 
-//-------------------------------------NOSOTROS--------------------------------------------------//
-
-
-// --- LÓGICA DEL FORMULARIO DE TASACIONES ---
-
-document.addEventListener('DOMContentLoaded', function () {
-    const formTasacion = document.getElementById('tasacionForm');
-    const successMsg = document.getElementById('successMsg');
-
-    if (formTasacion) {
-        formTasacion.addEventListener('submit', function (e) {
-            e.preventDefault();
-
-            const nombre = document.getElementById('nombre').value;
-            const operacion = document.getElementById('operacion').value;
-            const tipo = document.getElementById('tipo').value;
-            const zona = document.getElementById('zona').value;
-            const metros = document.getElementById('metros').value;
-
-            successMsg.classList.remove('d-none');
-            formTasacion.reset();
-        });
-    }
-});
+//-------------------------------------NOSOTROS & TASACIONES------------------------------------//
 
 //CHATBOT CON BOTUI
 const botui = new BotUI('lonco-botui');
@@ -512,40 +489,118 @@ async function flujoVisita() {
     mostrarMenu('¿Te puedo ayudar en algo más?');
 }
 
-// 12. Conexión automática cuando se envía el formulario de Tasaciones
+// --- CONEXIÓN DEL FORMULARIO DE TASACIONES CON LONCOBOTI ---
 document.addEventListener('DOMContentLoaded', function () {
     const formularioTasacion = document.getElementById('tasacionForm');
     if (!formularioTasacion) return;
 
     formularioTasacion.addEventListener('submit', async function (evento) {
         evento.preventDefault();
-        const formData = new FormData(formularioTasacion);
 
-        const datos = {
-            zona: formData.get('zona'),
-            tipo_propiedad: formData.get('tipo_propiedad'),
-            operacion: formData.get('operacion'),
-            metros_cuadrados: formData.get('metros_cuadrados')
-        };
+        const formData = new FormData(formularioTasacion);
+        const nombre = (formData.get('nombre') || document.getElementById('nombre')?.value || '').trim();
+        const telefono = (formData.get('telefono') || document.getElementById('telefono')?.value || '').trim();
+        const operacion = (formData.get('operacion') || document.getElementById('operacion')?.value || 'venta').trim();
+        const tipoPropiedad = (formData.get('tipo_propiedad') || formData.get('tipo') || document.getElementById('tipo')?.value || 'Departamento').trim();
+        const zona = (formData.get('zona') || document.getElementById('zona')?.value || 'General').trim();
+        const metrosRaw = formData.get('metros_cuadrados')
+            ?? formData.get('superficie')
+            ?? formData.get('metros')
+            ?? document.getElementById('metros')?.value
+            ?? document.getElementById('superficie')?.value
+            ?? 0;
+        const metros = parseFloat(metrosRaw) || 0;
+
+        const successMsg = document.getElementById('successMsg');
+        if (successMsg) {
+            successMsg.classList.remove('d-none');
+        }
 
         const ventana = document.getElementById('ventanaChatbot');
-        if (ventana.classList.contains('d-none')) {
+        if (ventana && ventana.classList.contains('d-none')) {
             ventana.classList.remove('d-none');
+        }
+
+        if (!yaSaludo) {
             yaSaludo = true;
-        }
-
-        const resultado = await enviarPost('/chatbot/tasacion', datos);
-
-        if (resultado.ok) {
             await botui.message.add({
-                type: 'html',
-                delay: 500,
+                delay: 300,
                 loading: true,
-                content: '<strong>Tasación estimada (' + resultado.zona + ')</strong><br>' +
-                         'Operación: ' + resultado.operacion + ' (' + resultado.metros_cuadrados + ' m²)<br>' +
-                         'Valor aproximado: <strong>' + resultado.tasacion_formateada + '</strong>'
+                content: '¡Hola! Soy LoncoBoti, el asistente virtual de LoncoProp.'
             });
-            mostrarMenu('¿Te puedo ayudar en algo más?');
         }
+
+        const datos = {
+            nombre: nombre,
+            telefono: telefono,
+            zona: zona,
+            tipo_propiedad: tipoPropiedad,
+            operacion: operacion,
+            metros_cuadrados: metros
+        };
+
+        try {
+            const respuesta = await fetch('/chatbot/tasacion', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify(datos)
+            });
+
+            const resultado = respuesta.ok ? await respuesta.json() : null;
+
+            if (resultado && resultado.ok) {
+                await botui.message.add({
+                    type: 'html',
+                    delay: 400,
+                    loading: true,
+                    content: (nombre ? '¡Hola ' + nombre + '! ' : '') +
+                             '<strong>Tasación estimada (' + resultado.zona + ')</strong><br>' +
+                             'Tipo: ' + (resultado.tipo_propiedad || tipoPropiedad) + '<br>' +
+                             'Operación: ' + resultado.operacion + ' (' + resultado.metros_cuadrados + ' m²)<br>' +
+                             'Valor aproximado: <strong>' + resultado.tasacion_formateada + '</strong>'
+                });
+                formularioTasacion.reset();
+                mostrarMenu('¿Te puedo ayudar en algo más?');
+                return;
+            }
+        } catch (err) {
+            console.warn('No se pudo consultar /chatbot/tasacion, usando cálculo local:', err);
+        }
+
+        const valorM2 = calcularValorM2Referencia(zona, tipoPropiedad, operacion);
+        const estimado = Math.round(metros * valorM2);
+        const estimadoFormateado = '$' + estimado.toLocaleString('es-AR');
+
+        await botui.message.add({
+            type: 'html',
+            delay: 400,
+            loading: true,
+            content: (nombre ? '¡Hola ' + nombre + '! ' : '') +
+                     '<strong>Tasación estimada (' + zona + ')</strong><br>' +
+                     'Tipo: ' + tipoPropiedad + ' — Operación: ' + operacion + ' (' + metros + ' m²)<br>' +
+                     'Valor aproximado: <strong>' + estimadoFormateado + '</strong><br>' +
+                     '<small>Un asesor de LoncoProp revisará los datos para afinar el informe.</small>'
+        });
+
+        formularioTasacion.reset();
+        mostrarMenu('¿Te puedo ayudar en algo más?');
     });
 });
+
+function calcularValorM2Referencia(zona, tipo, operacion) {
+    const z = (zona || '').toLowerCase();
+    let baseM2 = 1200;
+
+    if (z.includes('centro')) baseM2 = 1450;
+    else if (z.includes('alta barda')) baseM2 = 1350;
+    else if (z.includes('este')) baseM2 = 1150;
+
+    if ((tipo || '').toLowerCase().includes('casa')) baseM2 *= 1.1;
+    if ((operacion || '').toLowerCase().includes('alquil')) baseM2 = Math.round(baseM2 * 0.0045);
+
+    return baseM2;
+}

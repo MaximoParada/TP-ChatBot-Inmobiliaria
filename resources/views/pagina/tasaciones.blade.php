@@ -84,12 +84,17 @@
                     <div class="row g-3 mb-3">
                         <div class="col-12 col-sm-6">
                             <label for="zona" class="form-label fw-semibold small">Zona o Barrio</label>
-                            <input type="text" id="zona" name="zona" class="form-control" placeholder="Ej: Centro, Alta Barda..." required>
+                            <select id="zona" name="zona" class="form-select" required>
+                                <option value="">Seleccioná una zona</option>
+                                <option value="Zona Este">Zona Este</option>
+                                <option value="Zona Centro">Zona Centro</option>
+                                <option value="Alta Barda">Alta Barda</option>
+                            </select>
                         </div>
 
                         <div class="col-12 col-sm-6">
                             <label for="metros" class="form-label fw-semibold small">Superficie aprox. (m²)</label>
-                            <input type="number" id="metros" name="metros" class="form-control" placeholder="Ej: 85" required>
+                            <input type="number" id="metros" name="metros" class="form-control" placeholder="Ej: 85" min="1" required>
                         </div>
                     </div>
 

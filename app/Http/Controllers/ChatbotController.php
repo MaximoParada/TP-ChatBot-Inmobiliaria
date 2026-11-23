@@ -121,21 +121,34 @@ class ChatbotController extends Controller
     // 5. Calcular tasación aproximada cuando se completa el formulario de Tasaciones
     public function calcularTasacion(Request $request)
     {
+        $opRaw = mb_strtolower(trim((string) $request->input('operacion', 'venta')));
+        $operacionNormalizada = str_contains($opRaw, 'alquil') ? 'alquiler' : 'venta';
+
+        $request->merge([
+            'operacion' => $operacionNormalizada,
+            'zona' => trim((string) $request->input('zona', 'General')),
+            'tipo_propiedad' => trim((string) $request->input('tipo_propiedad', 'Departamento')),
+            'metros_cuadrados' => (float) $request->input('metros_cuadrados', 0),
+        ]);
+
         $datos = $request->validate([
-            'zona' => 'required|string',
-            'tipo_propiedad' => 'required|string',
+            'zona' => 'required|string|max:120',
+            'tipo_propiedad' => 'required|string|max:120',
             'operacion' => 'required|in:venta,alquiler',
             'metros_cuadrados' => 'required|numeric|min:1',
         ]);
 
-        $referencia = ReferenciaTasacion::where('zona', $datos['zona'])
+        $referencia = ReferenciaTasacion::where('zona', 'like', $datos['zona'])
             ->where('tipo_propiedad', strtolower($datos['tipo_propiedad']))
             ->where('operacion', $datos['operacion'])
             ->first();
 
         // Valor por defecto si la combinación exacta no está cargada en referencias_tasacion
-        $valorM2 = $referencia ? $referencia->valor_m2 : ($datos['operacion'] === 'venta' ? 1500000 : 12000);
-        $totalEstimado = $valorM2 * $datos['metros_cuadrados'];
+        $valorM2 = $referencia
+            ? (float) $referencia->valor_m2
+            : ($datos['operacion'] === 'venta' ? 1500000 : 12000);
+
+        $totalEstimado = $valorM2 * (float) $datos['metros_cuadrados'];
 
         return response()->json([
             'ok' => true,
