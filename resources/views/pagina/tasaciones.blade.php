@@ -41,14 +41,14 @@
                 <span class="step-circle">3</span>
                 <div>
                     <h3 class="h6 fw-bold mb-1">Informe sin compromiso</h3>
-                    <p class="text-muted small mb-0">Recibís el rango estimado para vender o alquilar rápido.</p>
+                    <p class="text-muted small mb-0">Se abrirá nuestro asistente virtual y te mostrará el rango estimado para vender o alquilar rápido.</p>
                 </div>
             </div>
 
             {{-- Aviso al chatbot --}}
             <div class="bg-light rounded-4 p-4 small" role="button" onclick="toggleChatbot()">
-                <strong class="d-block mb-1">¿Preferís hacerlo más rápido?</strong>
-                Abrí nuestro asistente virtual abajo a la derecha y seleccioná <em>"Quiero tasar mi propiedad"</em> para guiarte paso a paso.
+                <strong class="d-block mb-1">¿Necesitás ayuda?</strong>
+                Abrí nuestro asistente virtual arriba a la derecha y seleccioná tus consultas.
             </div>
         </div>
 

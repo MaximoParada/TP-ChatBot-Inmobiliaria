@@ -25,7 +25,7 @@
       overflow-x: hidden;
     }
 
-    /* --- HERO SECTION CENTRADO Y LEGIBLE --- */
+    /* --- HERO SECTION CON CONTRASTE Y UBICACIÓN EXACTA --- */
     .hero {
       position: relative;
       height: 78vh;
@@ -34,38 +34,43 @@
                   url('https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1600&q=80') center/cover no-repeat;
       display: flex;
       flex-direction: column;
-      justify-content: center;
+      justify-content: flex-end;
       align-items: center;
-      text-align: center;
-      padding: 40px 6%;
+      padding: 40px 6% 48px;
       color: #ffffff;
     }
 
-    /* Título y subtítulo centrados */
+    /* Alineado con el texto "Alquilar" dentro de la barra de búsqueda */
     .hero-content {
-      max-width: 960px;
+      max-width: 840px;
       width: 100%;
       margin: 0 auto;
+      padding-left: 24px;
+      text-align: left;
     }
 
     .hero-title {
-      font-size: clamp(3.4rem, 7.5vw, 6rem);
-      font-weight: 800;
-      letter-spacing: -0.04em;
-      line-height: 1;
-      margin-bottom: 16px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: clamp(3.4rem, 6.8vw, 5.3rem);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.02;
+      margin: 0 0 12px 0;
+      text-align: left;
       color: #ffffff;
-      text-shadow: 0 8px 32px rgba(0, 0, 0, 0.45), 0 2px 6px rgba(0, 0, 0, 0.35);
+      text-shadow: 0 6px 28px rgba(0, 0, 0, 0.45), 0 2px 6px rgba(0, 0, 0, 0.35);
     }
 
     .hero-subtitle {
-      font-size: 1.18rem;
-      font-weight: 500;
-      line-height: 1.55;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 0.98rem;
+      font-weight: 400;
+      line-height: 1.45;
       color: #f8fafc;
-      max-width: 500px;
-      margin: 0 auto 38px auto;
-      text-shadow: 0 2px 16px rgba(0, 0, 0, 0.8), 0 1px 4px rgba(0, 0, 0, 0.65);
+      max-width: 245px;
+      margin: 0 0 28px 0;
+      text-align: left;
+      text-shadow: 0 2px 14px rgba(0, 0, 0, 0.85), 0 1px 4px rgba(0, 0, 0, 0.7);
     }
 
     /* Barra de búsqueda tipo píldora moderna */
@@ -80,7 +85,7 @@
       justify-content: space-between;
       gap: 4px;
       box-shadow: 0 24px 50px rgba(15, 23, 42, 0.32);
-      max-width: 860px;
+      max-width: 840px;
       width: 100%;
       margin: 0 auto;
     }
@@ -222,11 +227,12 @@
     }
 
     .showcase-statement {
-      max-width: 680px;
-      font-size: clamp(1.35rem, 2.4vw, 1.8rem);
-      font-weight: 600;
-      letter-spacing: -0.02em;
-      line-height: 1.35;
+      max-width: 650px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: clamp(1.45rem, 2.5vw, 1.88rem);
+      font-weight: 400;
+      letter-spacing: -0.025em;
+      line-height: 1.32;
       color: var(--text-main);
       text-align: left;
       margin: 0;
@@ -335,7 +341,10 @@
       .hero {
         height: auto;
         min-height: 480px;
-        padding: 60px 16px;
+        padding: 60px 16px 36px;
+      }
+      .hero-content {
+        padding-left: 4px;
       }
       .search-bar {
         flex-direction: column;
@@ -518,6 +527,7 @@
       user-select: all;
       cursor: text;
     }
+
 /*-------------------------------NOSOTROS-----------------------------------*/
 
 .titulo-nosotros {

@@ -8,7 +8,7 @@
   <header class="hero d-flex align-items-center justify-content-center text-center">
     <div class="container hero-content">
       <h1 class="hero-title">LoncoProp</h1>
-      <p class="hero-subtitle mx-auto">
+      <p class="hero-subtitle ">
         Comprar o alquilar tu próxima propiedad, de forma simple y segura.
       </p>
 
