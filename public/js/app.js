@@ -1,6 +1,7 @@
-//-----------------------------------------INICIO-----------------------------------------------//
+//-----------------------------------------INICIO & TASACIONES-----------------------------------------------//
 
 document.addEventListener('DOMContentLoaded', () => {
+  // 1. BUSCADOR DE PROPIEDADES EN INICIO
   const formBuscador = document.getElementById('form-buscador');
   const contenedorTarjetas = document.getElementById('contenedor-tarjetas');
   const accionReset = document.getElementById('accion-reset-filtros');
@@ -10,101 +11,201 @@ document.addEventListener('DOMContentLoaded', () => {
   inicializarCarruseles(document);
   vincularClickTarjetas(document);
 
-  if (!formBuscador || !contenedorTarjetas) return;
+  if (formBuscador && contenedorTarjetas) {
+    const hayFiltrosActivos = () => {
+      const formData = new FormData(formBuscador);
+      for (const [, valor] of formData.entries()) {
+        if (valor.trim() !== '') return true;
+      }
+      return false;
+    };
 
-  const hayFiltrosActivos = () => {
-    const formData = new FormData(formBuscador);
-    for (const [, valor] of formData.entries()) {
-      if (valor.trim() !== '') return true;
+    const actualizarBotonVerTodas = (cantidadResultados) => {
+      if (!accionReset) return;
+      if (hayFiltrosActivos() && cantidadResultados > 0) {
+        accionReset.classList.remove('d-none');
+      } else {
+        accionReset.classList.add('d-none');
+      }
+    };
+
+    const limpiarFiltrosYRecargar = () => {
+      formBuscador.reset();
+      if (accionReset) accionReset.classList.add('d-none');
+      ejecutarBusqueda('');
+    };
+
+    if (btnVerTodas) {
+      btnVerTodas.addEventListener('click', limpiarFiltrosYRecargar);
     }
-    return false;
-  };
 
-  const actualizarBotonVerTodas = (cantidadResultados) => {
-    if (!accionReset) return;
-    if (hayFiltrosActivos() && cantidadResultados > 0) {
-      accionReset.classList.remove('d-none');
-    } else {
-      accionReset.classList.add('d-none');
-    }
-  };
+    const ejecutarBusqueda = async (paramsString = '') => {
+      const url = `${formBuscador.action}${paramsString ? '?' + paramsString : ''}`;
+      const btnBuscar = formBuscador.querySelector('.btn-search');
+      const textoOriginal = btnBuscar ? btnBuscar.textContent : 'Buscar ahora';
 
-  const limpiarFiltrosYRecargar = () => {
-    formBuscador.reset();
-    if (accionReset) accionReset.classList.add('d-none');
-    ejecutarBusqueda('');
-  };
+      if (btnBuscar) {
+        btnBuscar.disabled = true;
+        btnBuscar.textContent = 'Buscando...';
+      }
 
-  if (btnVerTodas) {
-    btnVerTodas.addEventListener('click', limpiarFiltrosYRecargar);
+      try {
+        const response = await fetch(url, {
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json',
+          },
+        });
+
+        if (!response.ok) throw new Error('Error al filtrar propiedades');
+
+        const data = await response.json();
+
+        if (Array.isArray(data)) {
+          contenedorTarjetas.innerHTML = renderizarTarjetasDesdeJson(data);
+          actualizarBotonVerTodas(data.length);
+        } else if (typeof data.html === 'string') {
+          contenedorTarjetas.innerHTML = data.html;
+          const cantCards = contenedorTarjetas.querySelectorAll('.property-card').length;
+          actualizarBotonVerTodas(cantCards);
+        }
+
+        inicializarCarruseles(contenedorTarjetas);
+        vincularClickTarjetas(contenedorTarjetas);
+
+        const btnLimpiarVacio = document.getElementById('btn-limpiar-filtros');
+        if (btnLimpiarVacio) {
+          btnLimpiarVacio.addEventListener('click', limpiarFiltrosYRecargar);
+        }
+
+        if (seccionAncla) {
+          seccionAncla.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      } catch (error) {
+        console.error('Error al filtrar propiedades:', error);
+      } finally {
+        if (btnBuscar) {
+          btnBuscar.disabled = false;
+          btnBuscar.textContent = textoOriginal;
+        }
+      }
+    };
+
+    formBuscador.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const formData = new FormData(formBuscador);
+      const params = new URLSearchParams();
+
+      for (const [clave, valor] of formData.entries()) {
+        if (valor.trim() !== '') {
+          params.append(clave, valor);
+        }
+      }
+
+      ejecutarBusqueda(params.toString());
+    });
   }
 
-  const ejecutarBusqueda = async (paramsString = '') => {
-    const url = `${formBuscador.action}${paramsString ? '?' + paramsString : ''}`;
-    const btnBuscar = formBuscador.querySelector('.btn-search');
-    const textoOriginal = btnBuscar ? btnBuscar.textContent : 'Buscar ahora';
+  // 2. CONEXIÓN DEL FORMULARIO DE TASACIONES CON LONCOBOTI
+  const formularioTasacion = document.getElementById('tasacionForm');
+  if (formularioTasacion) {
+    formularioTasacion.addEventListener('submit', async function (evento) {
+      evento.preventDefault();
 
-    if (btnBuscar) {
-      btnBuscar.disabled = true;
-      btnBuscar.textContent = 'Buscando...';
-    }
+      const formData = new FormData(formularioTasacion);
+      const nombre = (formData.get('nombre') || document.getElementById('nombre')?.value || '').trim();
+      const telefono = (formData.get('telefono') || formData.get('contacto') || document.getElementById('telefono')?.value || document.getElementById('contacto')?.value || '').trim();
+      const operacion = (formData.get('operacion') || document.getElementById('operacion')?.value || 'venta').trim();
+      const tipoPropiedad = (formData.get('tipo_propiedad') || formData.get('tipo') || document.getElementById('tipo')?.value || 'Departamento').trim();
+      const zona = (formData.get('zona') || document.getElementById('zona')?.value || 'General').trim();
+      const metrosRaw = formData.get('metros_cuadrados')
+        ?? formData.get('superficie')
+        ?? formData.get('metros')
+        ?? document.getElementById('metros')?.value
+        ?? document.getElementById('superficie')?.value
+        ?? 0;
+      const metros = parseFloat(metrosRaw) || 0;
 
-    try {
-      const response = await fetch(url, {
-        headers: {
-          'X-Requested-With': 'XMLHttpRequest',
-          'Accept': 'application/json',
-        },
+      const successMsg = document.getElementById('successMsg');
+      if (successMsg) {
+        successMsg.classList.remove('d-none');
+      }
+
+      const ventana = document.getElementById('ventanaChatbot');
+      if (ventana && ventana.classList.contains('d-none')) {
+        ventana.classList.remove('d-none');
+      }
+
+      if (!yaSaludo) {
+        yaSaludo = true;
+        await botui.message.add({
+          delay: 300,
+          loading: true,
+          content: '¡Hola! Soy LoncoBoti, el asistente virtual de LoncoProp.'
+        });
+      }
+
+      const datos = {
+        nombre: nombre,
+        telefono: telefono,
+        zona: zona,
+        tipo_propiedad: tipoPropiedad,
+        operacion: operacion,
+        metros_cuadrados: metros
+      };
+
+      try {
+        const respuesta = await fetch('/chatbot/tasacion', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+          },
+          body: JSON.stringify(datos)
+        });
+
+        const resultado = respuesta.ok ? await respuesta.json() : null;
+
+        if (resultado && resultado.ok) {
+          await botui.message.add({
+            type: 'html',
+            delay: 400,
+            loading: true,
+            content: (nombre ? '¡Hola ' + nombre + '! ' : '') +
+                     '<strong>Tasación estimada (' + resultado.zona + ')</strong><br>' +
+                     'Tipo: ' + (resultado.tipo_propiedad || tipoPropiedad) + '<br>' +
+                     'Operación: ' + resultado.operacion + ' (' + resultado.metros_cuadrados + ' m²)<br>' +
+                     'Valor aproximado: <strong>' + resultado.tasacion_formateada + '</strong>'
+          });
+          formularioTasacion.reset();
+          mostrarMenu('¿Te puedo ayudar en algo más?');
+          return;
+        }
+      } catch (err) {
+        console.warn('No se pudo consultar /chatbot/tasacion, usando cálculo local:', err);
+      }
+
+      const valorM2 = calcularValorM2Referencia(zona, tipoPropiedad, operacion);
+      const estimado = Math.round(metros * valorM2);
+      const estimadoFormateado = '$' + estimado.toLocaleString('es-AR');
+
+      await botui.message.add({
+        type: 'html',
+        delay: 400,
+        loading: true,
+        content: (nombre ? '¡Hola ' + nombre + '! ' : '') +
+                 '<strong>Tasación estimada (' + zona + ')</strong><br>' +
+                 'Tipo: ' + tipoPropiedad + ' — Operación: ' + operacion + ' (' + metros + ' m²)<br>' +
+                 'Valor aproximado: <strong>' + estimadoFormateado + '</strong><br>' +
+                 '<small>Un asesor de LoncoProp revisará los datos para afinar el informe.</small>'
       });
 
-      if (!response.ok) throw new Error('Error al filtrar propiedades');
-
-      const data = await response.json();
-
-      if (Array.isArray(data)) {
-        contenedorTarjetas.innerHTML = renderizarTarjetasDesdeJson(data);
-        actualizarBotonVerTodas(data.length);
-      } else if (typeof data.html === 'string') {
-        contenedorTarjetas.innerHTML = data.html;
-        const cantCards = contenedorTarjetas.querySelectorAll('.property-card').length;
-        actualizarBotonVerTodas(cantCards);
-      }
-
-      inicializarCarruseles(contenedorTarjetas);
-      vincularClickTarjetas(contenedorTarjetas);
-
-      const btnLimpiarVacio = document.getElementById('btn-limpiar-filtros');
-      if (btnLimpiarVacio) {
-        btnLimpiarVacio.addEventListener('click', limpiarFiltrosYRecargar);
-      }
-
-      if (seccionAncla) {
-        seccionAncla.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    } catch (error) {
-      console.error('Error al filtrar propiedades:', error);
-    } finally {
-      if (btnBuscar) {
-        btnBuscar.disabled = false;
-        btnBuscar.textContent = textoOriginal;
-      }
-    }
-  };
-
-  formBuscador.addEventListener('submit', (e) => {
-    e.preventDefault();
-
-    const formData = new FormData(formBuscador);
-    const params = new URLSearchParams();
-
-    for (const [clave, valor] of formData.entries()) {
-      if (valor.trim() !== '') {
-        params.append(clave, valor);
-      }
-    }
-
-    ejecutarBusqueda(params.toString());
-  });
+      formularioTasacion.reset();
+      mostrarMenu('¿Te puedo ayudar en algo más?');
+    });
+  }
 });
 
 function vincularClickTarjetas(scope) {
@@ -235,372 +336,327 @@ function renderizarTarjetasDesdeJson(propiedades) {
   }).join('');
 }
 
+//-------------------------------------CHATBOT CON BOTUI------------------------------------//
 
-//-------------------------------------NOSOTROS & TASACIONES------------------------------------//
-
-//CHATBOT CON BOTUI
 const botui = new BotUI('lonco-botui');
 let yaSaludo = false;
+let idBusquedaActual = 0;
 
 function toggleChatbot() {
-    const ventana = document.getElementById('ventanaChatbot');
-    ventana.classList.toggle('d-none');
+  const ventana = document.getElementById('ventanaChatbot');
+  ventana.classList.toggle('d-none');
 
-    if (!ventana.classList.contains('d-none') && !yaSaludo) {
-        yaSaludo = true;
-        iniciarConversacion();
-    }
+  if (!ventana.classList.contains('d-none') && !yaSaludo) {
+    yaSaludo = true;
+    iniciarConversacion();
+  }
 }
 
 async function enviarPost(url, datos) {
-    const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+  const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-    const respuesta = await fetch(url, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'X-CSRF-TOKEN': token
-        },
-        body: JSON.stringify(datos)
-    });
+  const respuesta = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'X-CSRF-TOKEN': token
+    },
+    body: JSON.stringify(datos)
+  });
 
-    return await respuesta.json();
+  return await respuesta.json();
 }
 
 async function iniciarConversacion() {
-    await botui.message.add({
-        delay: 400,
-        loading: true,
-        content: '¡Hola! Soy LoncoBoti, el asistente virtual de LoncoProp.'
-    });
+  await botui.message.add({
+    delay: 400,
+    loading: true,
+    content: '¡Hola! Soy LoncoBoti, el asistente virtual de LoncoProp.'
+  });
 
-    mostrarMenu('¿En qué te puedo ayudar?');
+  mostrarMenu('¿En qué te puedo ayudar?');
 }
 
 async function mostrarMenu(pregunta) {
-    await botui.message.add({
-        delay: 400,
-        loading: true,
-        content: pregunta
-    });
+  limpiarExtrasInput();
 
-    const opcion = await botui.action.button({
-        action: [
-            { text: 'Quiero alquilar', value: 'alquiler_pasos' },
-            { text: 'Requisitos alquiler', value: 'alquiler_requisitos' },
-            { text: 'Quiero comprar', value: 'compra_pasos' },
-            { text: 'Requisitos comprar', value: 'compra_requisitos' },
-            { text: 'Horarios y teléfono', value: 'contacto_info' },
-            { text: 'Agendar visita', value: 'agendar_visita' },
-            { text: 'Otra pregunta', value: 'otra_pregunta' },
-            { text: 'Salir del chat', value: 'salir' }
-        ]
-    });
+  await botui.message.add({
+    delay: 400,
+    loading: true,
+    content: pregunta
+  });
 
-    if (opcion.value === 'salir') {
-        salirDelChat();
-    } else if (opcion.value === 'otra_pregunta') {
-        flujoOtraPregunta();
-    } else if (opcion.value === 'agendar_visita') {
-        flujoVisita();
-    } else {
-        verRespuesta(opcion.value);
-    }
+  const opcion = await botui.action.button({
+    action: [
+      { text: 'Quiero alquilar', value: 'alquiler_pasos' },
+      { text: 'Requisitos alquiler', value: 'alquiler_requisitos' },
+      { text: 'Quiero comprar', value: 'compra_pasos' },
+      { text: 'Requisitos comprar', value: 'compra_requisitos' },
+      { text: 'Horarios y teléfono', value: 'contacto_info' },
+      { text: 'Agendar visita', value: 'agendar_visita' },
+      { text: 'Otra pregunta', value: 'otra_pregunta' },
+      { text: 'Salir del chat', value: 'salir' }
+    ]
+  });
+
+  if (opcion.value === 'salir') {
+    salirDelChat();
+  } else if (opcion.value === 'otra_pregunta') {
+    flujoOtraPregunta();
+  } else if (opcion.value === 'agendar_visita') {
+    flujoVisita();
+  } else {
+    verRespuesta(opcion.value);
+  }
 }
 
 function salirDelChat() {
-    document.getElementById('ventanaChatbot').classList.add('d-none');
-    botui.message.removeAll();
-    yaSaludo = false;
+  idBusquedaActual++;
+  limpiarExtrasInput();
+  document.getElementById('ventanaChatbot').classList.add('d-none');
+  botui.message.removeAll();
+  yaSaludo = false;
+}
+
+function limpiarExtrasInput() {
+  const viejos = document.querySelectorAll('.sugerencias-chat, .contenedor-volver-chat');
+  for (let i = 0; i < viejos.length; i++) {
+    viejos[i].remove();
+  }
 }
 
 async function verRespuesta(clave) {
-    const respuesta = await fetch('/chatbot/respuesta/' + clave);
-    const datos = await respuesta.json();
+  const respuesta = await fetch('/chatbot/respuesta/' + clave);
+  const datos = await respuesta.json();
 
-    if (datos.ok) {
-        const textoOrdenado = datos.contenido.replace(/\n/g, '<br>');
-        await botui.message.add({ type: 'html', delay: 400, loading: true, content: textoOrdenado });
-    } else {
-        await botui.message.add({ delay: 300, content: datos.mensaje });
-    }
+  if (datos.ok) {
+    const textoOrdenado = datos.contenido.replace(/\n/g, '<br>');
+    await botui.message.add({ type: 'html', delay: 400, loading: true, content: textoOrdenado });
+  } else {
+    await botui.message.add({ delay: 300, content: datos.mensaje });
+  }
 
-    mostrarMenu('¿Te puedo ayudar en algo más?');
+  mostrarMenu('¿Te puedo ayudar en algo más?');
 }
 
 async function flujoOtraPregunta() {
-    await botui.message.add({
-        delay: 300,
-        content: 'Escribí tu consulta (o tocá una sugerencia mientras escribís):'
+  let yaRespondio = false;
+  limpiarExtrasInput();
+
+  await botui.message.add({
+    delay: 300,
+    content: 'Escribí tu consulta (o tocá una sugerencia mientras escribís):'
+  });
+
+  const promesaEscritura = botui.action.text({
+    action: { placeholder: 'Ej: alquiler, comprar, horarios...' }
+  });
+
+  const intervalo = setInterval(function () {
+    const inputBot = document.querySelector('.botui-actions-text-input');
+    const contenedorAcciones = document.querySelector('.botui-actions-container');
+    if (!inputBot || !contenedorAcciones) return;
+
+    clearInterval(intervalo);
+    limpiarExtrasInput();
+    inputBot.focus();
+
+    const cajaSugerencias = document.createElement('div');
+    cajaSugerencias.className = 'sugerencias-chat';
+    contenedorAcciones.prepend(cajaSugerencias);
+
+    const cajaVolver = document.createElement('div');
+    cajaVolver.className = 'contenedor-volver-chat';
+    const btnVolver = document.createElement('button');
+    btnVolver.type = 'button';
+    btnVolver.className = 'btn-volver-chat';
+    btnVolver.textContent = '← Volver al menú';
+
+    btnVolver.onclick = async function () {
+      yaRespondio = true;
+      idBusquedaActual++;
+      limpiarExtrasInput();
+      botui.action.hide();
+      await botui.message.add({ human: true, content: 'Volver al menú' });
+      mostrarMenu('¿En qué te puedo ayudar?');
+    };
+
+    cajaVolver.appendChild(btnVolver);
+    contenedorAcciones.appendChild(cajaVolver);
+
+    inputBot.addEventListener('input', async function () {
+      const texto = inputBot.value.trim();
+      const estaBusqueda = ++idBusquedaActual;
+
+      if (texto.length < 2) {
+        cajaSugerencias.innerHTML = '';
+        return;
+      }
+
+      const datos = await enviarPost('/chatbot/buscar-palabra', { texto: texto });
+
+      if (estaBusqueda !== idBusquedaActual || yaRespondio) return;
+
+      cajaSugerencias.innerHTML = '';
+      if (!datos.ok) return;
+
+      if (datos.tipo === 'sugerencias') {
+        const mostradas = [];
+        for (let i = 0; i < datos.sugerencias.length; i++) {
+          const item = datos.sugerencias[i];
+          const textoBoton = item.palabra || item.titulo;
+
+          if (mostradas.includes(textoBoton)) continue;
+          mostradas.push(textoBoton);
+
+          const boton = document.createElement('button');
+          boton.type = 'button';
+          boton.className = 'btn-sugerencia-chat';
+          boton.textContent = textoBoton;
+
+          boton.onclick = async function () {
+            yaRespondio = true;
+            idBusquedaActual++;
+            limpiarExtrasInput();
+            botui.action.hide();
+            await botui.message.add({ human: true, content: textoBoton });
+            verRespuesta(item.clave);
+          };
+
+          cajaSugerencias.appendChild(boton);
+        }
+      }
+
+      if (datos.tipo === 'respuesta_unica') {
+        const textoBoton = datos.palabra || datos.titulo;
+        const boton = document.createElement('button');
+        boton.type = 'button';
+        boton.className = 'btn-sugerencia-chat';
+        boton.textContent = textoBoton;
+
+        boton.onclick = async function () {
+          yaRespondio = true;
+          idBusquedaActual++;
+          limpiarExtrasInput();
+          botui.action.hide();
+          await botui.message.add({ human: true, content: textoBoton });
+          const textoOrdenado = datos.contenido.replace(/\n/g, '<br>');
+          await botui.message.add({ type: 'html', delay: 400, loading: true, content: textoOrdenado });
+          mostrarMenu('¿Te puedo ayudar en algo más?');
+        };
+
+        cajaSugerencias.appendChild(boton);
+      }
     });
+  }, 50);
 
-    const promesaEscritura = botui.action.text({
-        action: { placeholder: 'Ej: alquiler, comprar, horarios...' }
-    });
+  const escritura = await promesaEscritura;
+  if (yaRespondio) return;
 
-    activarSugerenciasEnVivo();
-
-    const escritura = await promesaEscritura;
-    procesarTextoEscrito(escritura.value);
-}
-
-function activarSugerenciasEnVivo() {
-    setTimeout(function () {
-        const inputBot = document.querySelector('.botui-actions-text-input');
-        const contenedorAcciones = document.querySelector('.botui-actions-container');
-        if (!inputBot || !contenedorAcciones) return;
-
-        const cajaSugerencias = document.createElement('div');
-        cajaSugerencias.className = 'sugerencias-chat';
-        contenedorAcciones.prepend(cajaSugerencias);
-
-        inputBot.addEventListener('input', async function () {
-            const texto = inputBot.value.trim();
-            cajaSugerencias.innerHTML = '';
-
-            if (texto.length < 2) return;
-
-            const datos = await enviarPost('/chatbot/buscar', { texto: texto });
-            if (!datos.ok) return;
-
-            if (datos.tipo === 'sugerencias') {
-                for (let i = 0; i < datos.sugerencias.length; i++) {
-                    const item = datos.sugerencias[i];
-                    const boton = document.createElement('button');
-                    boton.type = 'button';
-                    boton.className = 'btn-sugerencia-chat';
-                    boton.textContent = item.palabra;
-
-                    boton.onclick = async function () {
-                        botui.action.hide();
-                        await botui.message.add({ human: true, content: item.palabra });
-                        verRespuesta(item.clave);
-                    };
-
-                    cajaSugerencias.appendChild(boton);
-                }
-            }
-
-            if (datos.tipo === 'respuesta_unica') {
-                const boton = document.createElement('button');
-                boton.type = 'button';
-                boton.className = 'btn-sugerencia-chat';
-                boton.textContent = datos.titulo;
-
-                boton.onclick = async function () {
-                    botui.action.hide();
-                    await botui.message.add({ human: true, content: datos.titulo });
-                    const textoOrdenado = datos.contenido.replace(/\n/g, '<br>');
-                    await botui.message.add({ type: 'html', delay: 400, loading: true, content: textoOrdenado });
-                    mostrarMenu('¿Te puedo ayudar en algo más?');
-                };
-
-                cajaSugerencias.appendChild(boton);
-            }
-        });
-    }, 50);
+  yaRespondio = true;
+  idBusquedaActual++;
+  limpiarExtrasInput();
+  procesarTextoEscrito(escritura.value);
 }
 
 async function procesarTextoEscrito(texto) {
-    const datos = await enviarPost('/chatbot/buscar', { texto: texto });
+  const datos = await enviarPost('/chatbot/buscar-palabra', { texto: texto });
 
-    if (!datos.ok) {
-        await botui.message.add({
-            type: 'html',
-            delay: 400,
-            loading: true,
-            content: 'No entendí tu consulta o no tengo una respuesta para eso. ' +
-                     'Podés comunicarte con nosotros al <strong>+54 299 555-0148</strong> ' +
-                     'o por mail a <strong>hola@nexoprop.com.ar</strong>.'
-        });
-        mostrarMenu('¿Te puedo ayudar en algo más?');
-        return;
-    }
+  if (!datos.ok) {
+    await botui.message.add({
+      type: 'html',
+      delay: 400,
+      loading: true,
+      content: 'No entendí tu consulta o no tengo una respuesta para eso. ' +
+               'Podés comunicarte con nosotros al <strong>+54 299 555-0148</strong> ' +
+               'o por mail a <strong>hola@nexoprop.com.ar</strong>.'
+    });
+    mostrarMenu('¿Te puedo ayudar en algo más?');
+    return;
+  }
 
-    if (datos.tipo === 'respuesta_unica') {
-        const textoOrdenado = datos.contenido.replace(/\n/g, '<br>');
-        await botui.message.add({ type: 'html', delay: 400, loading: true, content: textoOrdenado });
-        mostrarMenu('¿Te puedo ayudar en algo más?');
-        return;
-    }
+  if (datos.tipo === 'respuesta_unica') {
+    const textoOrdenado = datos.contenido.replace(/\n/g, '<br>');
+    await botui.message.add({ type: 'html', delay: 400, loading: true, content: textoOrdenado });
+    mostrarMenu('¿Te puedo ayudar en algo más?');
+    return;
+  }
 
-    const botones = [];
-    for (let i = 0; i < datos.sugerencias.length; i++) {
-        botones.push({
-            text: datos.sugerencias[i].titulo,
-            value: datos.sugerencias[i].clave
-        });
-    }
+  const botones = [];
+  for (let i = 0; i < datos.sugerencias.length; i++) {
+    botones.push({
+      text: datos.sugerencias[i].palabra || datos.sugerencias[i].titulo,
+      value: datos.sugerencias[i].clave
+    });
+  }
 
-    await botui.message.add({ delay: 300, content: 'Encontré estas opciones relacionadas:' });
-    const elegida = await botui.action.button({ action: botones });
-    verRespuesta(elegida.value);
+  await botui.message.add({ delay: 300, content: 'Encontré estas opciones relacionadas:' });
+  const elegida = await botui.action.button({ action: botones });
+  verRespuesta(elegida.value);
 }
 
 async function flujoVisita() {
-    await botui.message.add({ delay: 300, content: 'Ingresá el código de la propiedad (ej: 101, 102, 103):' });
-    const codigo = await botui.action.text({ action: { placeholder: 'Código...' } });
+  await botui.message.add({ delay: 300, content: 'Ingresá el código de la propiedad (ej: 101, 102, 103):' });
+  const codigo = await botui.action.text({ action: { placeholder: 'Código...' } });
 
-    const respuesta = await fetch('/chatbot/propiedad/' + codigo.value.trim());
-    const prop = await respuesta.json();
+  const respuesta = await fetch('/chatbot/propiedad/' + codigo.value.trim());
+  const prop = await respuesta.json();
 
-    if (!prop.ok) {
-        await botui.message.add({ delay: 300, content: prop.mensaje });
-        mostrarMenu('¿Te puedo ayudar en algo más?');
-        return;
-    }
-
-    await botui.message.add({
-        type: 'html',
-        delay: 400,
-        content: '<strong>' + prop.titulo + '</strong><br>Dirección: ' + prop.direccion
-    });
-
-    let horarioElegido = '';
-    if (prop.horarios_visita && prop.horarios_visita.length > 0) {
-        const botonesHorarios = [];
-        for (let i = 0; i < prop.horarios_visita.length; i++) {
-            botonesHorarios.push({ text: prop.horarios_visita[i], value: prop.horarios_visita[i] });
-        }
-        await botui.message.add({ delay: 300, content: 'Elegí un horario disponible:' });
-        const btn = await botui.action.button({ action: botonesHorarios });
-        horarioElegido = btn.value;
-    } else {
-        await botui.message.add({ delay: 300, content: '¿Qué día y horario preferís?' });
-        const txt = await botui.action.text({ action: { placeholder: 'Ej: Martes 10:00 hs' } });
-        horarioElegido = txt.value;
-    }
-
-    await botui.message.add({ delay: 300, content: '¿Cuál es tu nombre completo?' });
-    const nombre = await botui.action.text({ action: { placeholder: 'Tu nombre...' } });
-
-    await botui.message.add({ delay: 300, content: 'Dejanos un teléfono de contacto:' });
-    const telefono = await botui.action.text({ action: { placeholder: 'Ej: 299 555-1234' } });
-
-    const resultado = await enviarPost('/chatbot/visita', {
-        propiedad_id: prop.id,
-        nombre_cliente: nombre.value,
-        telefono_cliente: telefono.value,
-        fecha_elegida: horarioElegido
-    });
-
-    await botui.message.add({ delay: 400, loading: true, content: resultado.mensaje });
+  if (!prop.ok) {
+    await botui.message.add({ delay: 300, content: prop.mensaje });
     mostrarMenu('¿Te puedo ayudar en algo más?');
+    return;
+  }
+
+  await botui.message.add({
+    type: 'html',
+    delay: 400,
+    content: '<strong>' + prop.titulo + '</strong><br>Dirección: ' + prop.direccion
+  });
+
+  let horarioElegido = '';
+  if (prop.horarios_visita && prop.horarios_visita.length > 0) {
+    const botonesHorarios = [];
+    for (let i = 0; i < prop.horarios_visita.length; i++) {
+      botonesHorarios.push({ text: prop.horarios_visita[i], value: prop.horarios_visita[i] });
+    }
+    await botui.message.add({ delay: 300, content: 'Elegí un horario disponible:' });
+    const btn = await botui.action.button({ action: botonesHorarios });
+    horarioElegido = btn.value;
+  } else {
+    await botui.message.add({ delay: 300, content: '¿Qué día y horario preferís?' });
+    const txt = await botui.action.text({ action: { placeholder: 'Ej: Martes 10:00 hs' } });
+    horarioElegido = txt.value;
+  }
+
+  await botui.message.add({ delay: 300, content: '¿Cuál es tu nombre completo?' });
+  const nombre = await botui.action.text({ action: { placeholder: 'Tu nombre...' } });
+
+  await botui.message.add({ delay: 300, content: 'Dejanos un teléfono de contacto:' });
+  const telefono = await botui.action.text({ action: { placeholder: 'Ej: 299 555-1234' } });
+
+  const resultado = await enviarPost('/chatbot/visita', {
+    propiedad_id: prop.id,
+    nombre_cliente: nombre.value,
+    telefono_cliente: telefono.value,
+    fecha_elegida: horarioElegido
+  });
+
+  await botui.message.add({ delay: 400, loading: true, content: resultado.mensaje });
+  mostrarMenu('¿Te puedo ayudar en algo más?');
 }
 
-// --- CONEXIÓN DEL FORMULARIO DE TASACIONES CON LONCOBOTI ---
-document.addEventListener('DOMContentLoaded', function () {
-    const formularioTasacion = document.getElementById('tasacionForm');
-    if (!formularioTasacion) return;
-
-    formularioTasacion.addEventListener('submit', async function (evento) {
-        evento.preventDefault();
-
-        const formData = new FormData(formularioTasacion);
-        const nombre = (formData.get('nombre') || document.getElementById('nombre')?.value || '').trim();
-        const telefono = (formData.get('telefono') || document.getElementById('telefono')?.value || '').trim();
-        const operacion = (formData.get('operacion') || document.getElementById('operacion')?.value || 'venta').trim();
-        const tipoPropiedad = (formData.get('tipo_propiedad') || formData.get('tipo') || document.getElementById('tipo')?.value || 'Departamento').trim();
-        const zona = (formData.get('zona') || document.getElementById('zona')?.value || 'General').trim();
-        const metrosRaw = formData.get('metros_cuadrados')
-            ?? formData.get('superficie')
-            ?? formData.get('metros')
-            ?? document.getElementById('metros')?.value
-            ?? document.getElementById('superficie')?.value
-            ?? 0;
-        const metros = parseFloat(metrosRaw) || 0;
-
-        const successMsg = document.getElementById('successMsg');
-        if (successMsg) {
-            successMsg.classList.remove('d-none');
-        }
-
-        const ventana = document.getElementById('ventanaChatbot');
-        if (ventana && ventana.classList.contains('d-none')) {
-            ventana.classList.remove('d-none');
-        }
-
-        if (!yaSaludo) {
-            yaSaludo = true;
-            await botui.message.add({
-                delay: 300,
-                loading: true,
-                content: '¡Hola! Soy LoncoBoti, el asistente virtual de LoncoProp.'
-            });
-        }
-
-        const datos = {
-            nombre: nombre,
-            telefono: telefono,
-            zona: zona,
-            tipo_propiedad: tipoPropiedad,
-            operacion: operacion,
-            metros_cuadrados: metros
-        };
-
-        try {
-            const respuesta = await fetch('/chatbot/tasacion', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                },
-                body: JSON.stringify(datos)
-            });
-
-            const resultado = respuesta.ok ? await respuesta.json() : null;
-
-            if (resultado && resultado.ok) {
-                await botui.message.add({
-                    type: 'html',
-                    delay: 400,
-                    loading: true,
-                    content: (nombre ? '¡Hola ' + nombre + '! ' : '') +
-                             '<strong>Tasación estimada (' + resultado.zona + ')</strong><br>' +
-                             'Tipo: ' + (resultado.tipo_propiedad || tipoPropiedad) + '<br>' +
-                             'Operación: ' + resultado.operacion + ' (' + resultado.metros_cuadrados + ' m²)<br>' +
-                             'Valor aproximado: <strong>' + resultado.tasacion_formateada + '</strong>'
-                });
-                formularioTasacion.reset();
-                mostrarMenu('¿Te puedo ayudar en algo más?');
-                return;
-            }
-        } catch (err) {
-            console.warn('No se pudo consultar /chatbot/tasacion, usando cálculo local:', err);
-        }
-
-        const valorM2 = calcularValorM2Referencia(zona, tipoPropiedad, operacion);
-        const estimado = Math.round(metros * valorM2);
-        const estimadoFormateado = '$' + estimado.toLocaleString('es-AR');
-
-        await botui.message.add({
-            type: 'html',
-            delay: 400,
-            loading: true,
-            content: (nombre ? '¡Hola ' + nombre + '! ' : '') +
-                     '<strong>Tasación estimada (' + zona + ')</strong><br>' +
-                     'Tipo: ' + tipoPropiedad + ' — Operación: ' + operacion + ' (' + metros + ' m²)<br>' +
-                     'Valor aproximado: <strong>' + estimadoFormateado + '</strong><br>' +
-                     '<small>Un asesor de LoncoProp revisará los datos para afinar el informe.</small>'
-        });
-
-        formularioTasacion.reset();
-        mostrarMenu('¿Te puedo ayudar en algo más?');
-    });
-});
-
 function calcularValorM2Referencia(zona, tipo, operacion) {
-    const z = (zona || '').toLowerCase();
-    let baseM2 = 1200;
+  const z = (zona || '').toLowerCase();
+  let baseM2 = 1200;
 
-    if (z.includes('centro')) baseM2 = 1450;
-    else if (z.includes('alta barda')) baseM2 = 1350;
-    else if (z.includes('este')) baseM2 = 1150;
+  if (z.includes('centro')) baseM2 = 1450;
+  else if (z.includes('alta barda')) baseM2 = 1350;
+  else if (z.includes('este')) baseM2 = 1150;
 
-    if ((tipo || '').toLowerCase().includes('casa')) baseM2 *= 1.1;
-    if ((operacion || '').toLowerCase().includes('alquil')) baseM2 = Math.round(baseM2 * 0.0045);
+  if ((tipo || '').toLowerCase().includes('casa')) baseM2 *= 1.1;
+  if ((operacion || '').toLowerCase().includes('alquil')) baseM2 = Math.round(baseM2 * 0.0045);
 
-    return baseM2;
+  return baseM2;
 }
